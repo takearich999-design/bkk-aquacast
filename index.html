@@ -298,6 +298,19 @@
           <span id="radar-time-label" class="text-[11px] font-mono text-cyan-200 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800">กำลังโหลด...</span>
         </div>
       </div>
+      <!-- Live rain status notice -->
+      <div class="bg-slate-900/90 rounded-xl p-2 mb-2 border border-slate-800 text-[10px] space-y-1">
+        <div class="flex items-center justify-between text-slate-300">
+          <span>📍 พื้นที่ กทม.: <span class="text-emerald-400 font-bold">☀️ ปลอดกลุ่มฝน (0 dBZ)</span></span>
+          <button onclick="toggleSimulatedRain()" id="btn-sim-rain" class="px-2 py-0.5 rounded bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-700 transition">🧪 จำลองฝน กทม.</button>
+        </div>
+        <div class="flex items-center gap-1 text-[9px] text-slate-400 pt-0.5 border-t border-slate-800">
+          <span>⚡ จุดที่มีฝนตกสดขณะนี้:</span>
+          <button onclick="quickJump(0.5, 101.5, 7, 'ช่องแคบมะละกา/สุมาตรา (ฝนตกหนัก)')" class="text-cyan-400 underline hover:text-cyan-300">มะละกา</button> •
+          <button onclick="quickJump(48.5, 2.5, 6, 'ยุโรปกลาง (ฝนตกชุก)')" class="text-cyan-400 underline hover:text-cyan-300">ยุโรป</button> •
+          <button onclick="quickJump(47.6, -122.3, 7, 'ซีแอตเทิล สหรัฐฯ (ฝนตกหนัก)')" class="text-cyan-400 underline hover:text-cyan-300">อเมริกา</button>
+        </div>
+      </div>
 
       <!-- Controls Slider -->
       <div class="space-y-2">
@@ -1081,10 +1094,10 @@
       radarTileLayers = [];
 
       frames.forEach(frame => {
-        const layer = L.tileLayer(`${host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`, {
+        const layer = L.tileLayer(`${host}${frame.path}/256/{z}/{x}/{y}/1/1_1.png`, {
           opacity: 0,
           maxZoom: 18,
-          maxNativeZoom: 7,
+          maxNativeZoom: 12,
           zIndex: 100
         });
         radarTileLayers.push(layer);
@@ -1624,6 +1637,64 @@
     setupToggle('toggle-stations', 'stations');
     setupToggle('toggle-reports', 'reports');
     setupToggle('toggle-shelters', 'shelters');
+
+    
+    // ── SIMULATED RAIN CELL FOR TESTING ──
+    let simRainLayer = null;
+    function toggleSimulatedRain() {
+      const btn = document.getElementById('btn-sim-rain');
+      if (simRainLayer && map.hasLayer(simRainLayer)) {
+        map.removeLayer(simRainLayer);
+        simRainLayer = null;
+        if (btn) {
+          btn.textContent = '🧪 จำลองฝน กทม.';
+          btn.classList.replace('bg-rose-950', 'bg-cyan-950');
+          btn.classList.replace('text-rose-300', 'text-cyan-300');
+          btn.classList.replace('border-rose-700', 'border-cyan-700');
+        }
+      } else {
+        // Create simulated radial rain storm cells over Bangkok & Eastern corridor
+        simRainLayer = L.layerGroup();
+        
+        // Heavy cell (Red / Orange)
+        const cell1 = L.circle([13.7500, 100.5800], {
+          radius: 12000,
+          color: '#ef4444',
+          fillColor: '#ef4444',
+          fillOpacity: 0.55,
+          weight: 1
+        }).addTo(simRainLayer);
+
+        // Core thunderstorm (Purple / 55 dBZ)
+        const core = L.circle([13.7300, 100.6100], {
+          radius: 5000,
+          color: '#d946ef',
+          fillColor: '#d946ef',
+          fillOpacity: 0.70,
+          weight: 1
+        }).addTo(simRainLayer);
+
+        // Moderate rain fringe (Yellow / Green)
+        const fringe = L.circle([13.7800, 100.5500], {
+          radius: 22000,
+          color: '#10b981',
+          fillColor: '#10b981',
+          fillOpacity: 0.35,
+          weight: 1
+        }).addTo(simRainLayer);
+
+        cell1.bindPopup('<div class="p-1 font-bold text-rose-400 text-xs">🌧️ กลุ่มฝนจำลอง: 45-55 dBZ (ฝนตกหนักมาก)</div>');
+        simRainLayer.addTo(map);
+
+        if (btn) {
+          btn.textContent = '✕ ปิดฝนจำลอง';
+          btn.classList.replace('bg-cyan-950', 'bg-rose-950');
+          btn.classList.replace('text-cyan-300', 'text-rose-300');
+          btn.classList.replace('border-cyan-700', 'border-rose-700');
+        }
+        quickJump(13.7500, 100.5800, 11, 'กรุงเทพฯ (ทดสอบฝน)');
+      }
+    }
 
     // ── INITIAL BOOTSTRAP ──
     window.addEventListener('DOMContentLoaded', () => {
