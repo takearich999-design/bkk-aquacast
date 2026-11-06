@@ -2,17 +2,14 @@
 <html lang="th" class="h-full">
 <head>
   <meta charset="UTF-8">
-<!-- This site is hosted on Netlify. Anyone can build and deploy a site
-     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=2eea05fe-a25c-48bc-9c57-8a31bad8906e
-     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>BKK AquaCast — ศูนย์บัญชาการโทรมาตรแก้มลิงและเฝ้าระวังน้ำท่วม กทม.</title>
-  <meta name="description" content="ศูนย์ข้อมูลโทรมาตรแบบเรียลไทม์: แก้มลิง 16 แห่ง, 22 จุดเสี่ยงน้ำท่วม, เรดาร์ตรวจจับกลุ่มฝนสด, สมดุล 3 น้ำ, รายงานเหตุประชาชน และจุดจอดรถฉุกเฉิน กทม.">
+  <title>AquaCast Global & TH — ศูนย์บัญชาการโทรมาตร สภาพอากาศ และเรดาร์ตรวจจับฝนทั่วประเทศ & ทั่วโลก</title>
+  <meta name="description" content="ศูนย์ข้อมูลโทรมาตร สภาพอากาศ เรดาร์ฝนสดระดับประเทศและทั่วโลก (RainViewer Composite), เขื่อนหลัก 25 แห่งทั่วไทย, แก้มลิง 16 แห่ง กทม., จุดเสี่ยงน้ำท่วม และศูนย์พยากรณ์อากาศโลก">
   <meta name="theme-color" content="#070a12">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- Fonts & Icons -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -44,7 +41,7 @@
     }
   </script>
 
-  <!-- Leaflet 1.9.4 (Local Fast-Load with CDN fallback) -->
+  <!-- Leaflet 1.9.4 -->
   <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
   <script src="/vendor/leaflet/leaflet.js"></script>
   <script>
@@ -56,12 +53,11 @@
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    html, body { width: 100%; max-width: 100vw; height: 100%; margin: 0; padding: 0; background: #070a12; color: #f1f5f9; font-family: 'Prompt', system-ui, sans-serif; overflow-x: hidden; overflow-y: hidden; }
+    html, body { width: 100%; max-width: 100vw; height: 100%; margin: 0; padding: 0; background: #070a12; color: #f1f5f9; font-family: 'Prompt', system-ui, sans-serif; overflow: hidden; }
 
-    /* Map styling */
     #map { width: 100%; height: 100%; background: #090e17; z-index: 1; }
     .dark-tiles {
-      filter: brightness(0.55) invert(1) contrast(2.2) hue-rotate(200deg) saturate(0.35);
+      filter: brightness(0.6) invert(1) contrast(2.2) hue-rotate(200deg) saturate(0.35);
     }
     .leaflet-control-zoom { border: 1px solid #1e293b !important; border-radius: 8px !important; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important; }
     .leaflet-control-zoom a { background: #0e1626 !important; color: #38bdf8 !important; border-bottom: 1px solid #1e293b !important; }
@@ -98,618 +94,504 @@
 
     @keyframes pulse-cyan {
       0%   { box-shadow: 0 0 0 0 rgba(6,182,212,0.85); }
-      70%  { box-shadow: 0 0 0 12px rgba(6,182,212,0); }
+      70%  { box-shadow: 0 0 0 14px rgba(6,182,212,0); }
       100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); }
     }
-    .pulse-radar { animation: pulse-cyan 1.8s infinite; }
+    .pulse-cyan { animation: pulse-cyan 2s infinite; }
 
-    @keyframes live-ping {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.6); opacity: 0.3; }
-      100% { transform: scale(1); opacity: 1; }
+    /* Custom Glass Panel */
+    .glass-panel {
+      background: rgba(14, 22, 38, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(51, 65, 85, 0.6);
     }
-    .live-dot { animation: live-ping 1.8s ease-in-out infinite; }
 
     /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0a101d; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    ::-webkit-scrollbar-track { background: #070a12; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #0284c7; }
 
-    /* Glass Panels */
-    .glass-panel {
-      background: rgba(14, 22, 38, 0.90);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(51, 65, 85, 0.7);
-    }
-    .glass-card {
-      background: rgba(18, 28, 48, 0.75);
-      border: 1px solid rgba(51, 65, 85, 0.5);
-    }
-
-    /* Modal Backdrop */
-    .modal-backdrop {
-      background: rgba(3, 7, 18, 0.75);
-      backdrop-filter: blur(8px);
-    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="flex flex-col h-full bg-[#070a12] text-slate-100 select-none">
+<body class="h-full flex flex-col bg-[#070a12] text-slate-100 select-none">
 
-  <!-- ==========================================
-       TOP EXECUTIVE BAR
-  =========================================== -->
+  <!-- ================= TOP HEADER ================= -->
   <header class="relative z-30 flex-none glass-panel border-b border-slate-800 px-3 py-2 sm:px-5">
-    <div class="w-full max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+    <div class="flex items-center justify-between gap-3 max-w-[1920px] mx-auto">
       
-      <!-- Brand & Status -->
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2 sm:gap-3">
-          <div class="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-500 shadow-lg shadow-cyan-500/20 text-white font-black text-sm sm:text-lg shrink-0">
-            💧
-            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 live-dot border-2 border-[#070a12]"></span>
-          </div>
-          <div>
-            <div class="flex items-center gap-1.5">
-              <h1 class="text-sm sm:text-lg font-bold tracking-tight text-white flex items-center gap-1">
-                BKK AquaCast
-                <span class="text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">
-                  Command
-                </span>
-              </h1>
-              <span id="live-badge" class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                สตรีมข้อมูลสด
-              </span>
-            </div>
-            <p class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1">
-              <span class="hidden sm:inline">ศูนย์ติดตามแก้มลิง 16 แห่ง & เรดาร์ฝน กทม.</span>
-              <span class="sm:hidden">กทม. โทรมาตรสด</span>
-              <span class="text-slate-600">|</span>
-              <span class="text-cyan-400 font-mono text-[10px]" id="clock-display">--:--:--</span>
-            </p>
-          </div>
+      <!-- Brand & Badges -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 p-0.5 shadow-lg shadow-cyan-500/20 flex items-center justify-center cursor-pointer" onclick="zoomToScope('thailand')">
+          <span class="text-lg">🌊</span>
         </div>
-
-        <!-- Mobile Action Buttons -->
-        <div class="flex md:hidden items-center gap-1 shrink-0">
-          <button onclick="toggleRadarLayer()" id="btn-m-radar" class="px-2 py-1 text-[11px] font-semibold rounded-lg bg-cyan-950 border border-cyan-700 text-cyan-300 flex items-center gap-1 active:scale-95 transition" title="เปิด/ปิดเรดาร์ฝน">
-            🌧️ เรดาร์
-          </button>
-          <button id="btn-m-report" class="px-2 py-1 text-[11px] font-semibold rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1 shadow-sm active:scale-95 transition">
-            📸 แจ้งเหตุ
-          </button>
-          <button id="btn-m-sos" class="px-2 py-1 text-[11px] font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white active:scale-95 transition" title="สายด่วนฉุกเฉิน">
-            🚨 SOS
-          </button>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm sm:text-base font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">
+              AquaCast Global & TH
+            </h1>
+            <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-800/60">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              LIVE RADAR & TELEMETRY
+            </span>
+          </div>
+          <p class="text-[10px] text-slate-400 hidden sm:block">ศูนย์โทรมาตร เขื่อน ลุ่มน้ำ สภาพอากาศ และเรดาร์ฝนสด ทั่วประเทศ & ทั่วโลก</p>
         </div>
       </div>
 
-      <!-- Center: 3-Water Balance (สามน้ำ กทม.) -->
-      <div class="w-full min-w-0 grid grid-cols-3 gap-1 sm:gap-3 py-1 px-1.5 sm:px-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center sm:text-left">
-        <!-- Upstream Flow (น้ำเหนือ) -->
-        <div class="flex flex-col min-w-0 cursor-pointer hover:bg-slate-800/50 p-1 rounded-lg transition" onclick="switchTab('hydro')" title="คลิกเพื่อดูรายละเอียดสมดุลน้ำเหนือ">
-          <div class="flex items-center justify-center sm:justify-start gap-1 text-[10px] text-slate-400 font-medium truncate">
-            <span>🌊 น้ำเหนือ</span>
-            <span class="hidden sm:inline text-slate-500">(C.13/อยุธยา)</span>
-          </div>
-          <div class="flex items-baseline justify-center sm:justify-start gap-0.5 mt-0.5">
-            <span id="flow-val" class="font-mono text-xs sm:text-base font-bold text-cyan-300">1,376</span>
-            <span class="text-[9px] sm:text-[10px] text-slate-400">m³/s</span>
-          </div>
-          <span id="flow-sub" class="hidden sm:block text-[9px] text-emerald-400 font-medium">ต่ำกว่าเกณฑ์วิกฤต (1,500)</span>
+      <!-- Global Location Search Bar -->
+      <div class="flex-1 max-w-xs md:max-w-md mx-2 relative">
+        <div class="relative flex items-center">
+          <span class="absolute left-3 text-slate-400 text-xs pointer-events-none">🔍</span>
+          <input 
+            id="global-search-input" 
+            type="text" 
+            placeholder="ค้นหาจังหวัด / อำเภอ / ประเทศ / เมืองทั่วโลก..."
+            class="w-full pl-8 pr-8 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition"
+            onkeydown="if(event.key === 'Enter') handleSearchSubmit()"
+          />
+          <button id="clear-search-btn" onclick="clearSearch()" class="absolute right-2.5 text-slate-400 hover:text-white text-xs hidden">✕</button>
         </div>
-
-        <!-- Rain Radar (น้ำฝน) - Clickable to toggle radar -->
-        <div class="flex flex-col min-w-0 border-l border-slate-800 pl-1 sm:pl-3 cursor-pointer hover:bg-cyan-950/40 p-1 rounded-lg transition border border-transparent hover:border-cyan-800" onclick="toggleRadarLayer(true)" title="คลิกเพื่อเปิด/ปิดและโฟกัสเรดาร์กลุ่มฝนบนแผนที่">
-          <div class="flex items-center justify-center sm:justify-start gap-1 text-[10px] text-cyan-400 font-semibold truncate">
-            <span>🌧️ เรดาร์ฝน</span>
-            <span class="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 live-dot"></span>
+        <!-- Search suggestions dropdown -->
+        <div id="search-suggestions" class="absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-2 hidden z-50 text-xs">
+          <div class="text-[10px] text-slate-400 mb-1 px-1 font-semibold flex items-center justify-between">
+            <span>⚡ ทางลัดด่วน (Quick Jump):</span>
+            <span class="text-[9px] text-cyan-400">กด Enter เพื่อค้นหาทั้งโลก</span>
           </div>
-          <div class="flex items-baseline justify-center sm:justify-start gap-0.5 mt-0.5">
-            <span id="rain-val" class="font-mono text-xs sm:text-base font-bold text-sky-400">0.0</span>
-            <span class="text-[9px] sm:text-[10px] text-slate-400">mm/h</span>
+          <div class="flex flex-wrap gap-1 mb-2">
+            <button onclick="quickJump(18.7883, 98.9853, 10, 'เชียงใหม่')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-cyan-950 hover:text-cyan-300 text-slate-300">เชียงใหม่</button>
+            <button onclick="quickJump(16.4322, 102.8236, 10, 'ขอนแก่น')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-cyan-950 hover:text-cyan-300 text-slate-300">ขอนแก่น</button>
+            <button onclick="quickJump(15.2287, 104.8564, 10, 'อุบลราชธานี')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-cyan-950 hover:text-cyan-300 text-slate-300">อุบลฯ</button>
+            <button onclick="quickJump(7.0084, 100.4767, 11, 'หาดใหญ่')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-cyan-950 hover:text-cyan-300 text-slate-300">หาดใหญ่</button>
+            <button onclick="quickJump(7.8804, 98.3923, 11, 'ภูเก็ต')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-cyan-950 hover:text-cyan-300 text-slate-300">ภูเก็ต</button>
+            <button onclick="quickJump(35.6762, 139.6503, 9, 'Tokyo (โตเกียว)')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-cyan-950 hover:text-cyan-300 text-slate-300">Tokyo</button>
+            <button onclick="quickJump(1.3521, 103.8198, 11, 'Singapore')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-cyan-950 hover:text-cyan-300 text-slate-300">Singapore</button>
+            <button onclick="quickJump(51.5074, -0.1278, 9, 'London')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-cyan-950 hover:text-cyan-300 text-slate-300">London</button>
           </div>
-          <span class="hidden sm:block text-[9px] text-cyan-300 font-medium">สแกนสด 3 สถานี 📡</span>
-        </div>
-
-        <!-- Sea Tide (น้ำทะเลหนุน) -->
-        <div class="flex flex-col min-w-0 border-l border-slate-800 pl-1 sm:pl-3 cursor-pointer hover:bg-slate-800/50 p-1 rounded-lg transition" onclick="switchTab('hydro')" title="คลิกเพื่อดูรายละเอียดน้ำทะเลหนุน">
-          <div class="flex items-center justify-center sm:justify-start gap-1 text-[10px] text-slate-400 font-medium truncate">
-            <span>🌊 น้ำหนุน</span>
-            <span class="hidden sm:inline text-slate-500">(ป้อมพระจุลฯ)</span>
-          </div>
-          <div class="flex items-baseline justify-center sm:justify-start gap-0.5 mt-0.5">
-            <span id="tide-val" class="font-mono text-xs sm:text-base font-bold text-amber-300">+1.05</span>
-            <span class="text-[9px] sm:text-[10px] text-slate-400">ม.รสม.</span>
-          </div>
-          <span class="hidden sm:block text-[9px] text-amber-400 font-medium">เฝ้าระวังช่วง 19:30</span>
+          <div id="search-results-list" class="space-y-1 max-h-48 overflow-y-auto"></div>
         </div>
       </div>
 
-      <!-- Right Desktop Controls -->
-      <div class="hidden md:flex items-center gap-2 shrink-0">
-        <button id="btn-report" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white flex items-center gap-1.5 shadow-lg shadow-cyan-600/20 active:scale-95 transition">
-          <span>📸</span> แจ้งเหตุน้ำท่วม
+      <!-- Action Buttons & Clock -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <div class="hidden lg:flex flex-col items-end pr-2 font-mono text-[11px] border-r border-slate-700">
+          <span id="clock-display" class="text-cyan-300 font-bold">--:--:-- น.</span>
+          <span class="text-[9px] text-slate-400">UTC+7 (BKK) / Global Synced</span>
+        </div>
+
+        <button onclick="openReportModal()" class="px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white flex items-center gap-1 shadow-md shadow-cyan-600/20 active:scale-95 transition" title="แจ้งเหตุน้ำท่วม">
+          <span>📸</span>
+          <span class="hidden sm:inline">แจ้งเหตุน้ำท่วม</span>
         </button>
-        <button id="btn-sos" class="px-3 py-2 text-xs font-semibold rounded-xl bg-rose-600/90 hover:bg-rose-500 text-white flex items-center gap-1.5 shadow-lg shadow-rose-600/20 active:scale-95 transition">
-          <span>🚨</span> สายด่วน SOS
+
+        <button onclick="openSosModal()" class="px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-rose-600/90 hover:bg-rose-500 text-white flex items-center gap-1 shadow-md shadow-rose-600/20 active:scale-95 transition" title="สายด่วนฉุกเฉิน">
+          <span>🚨</span>
+          <span class="hidden sm:inline">สายด่วน</span>
         </button>
-        <button id="btn-sound" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 active:scale-95 transition" title="ทดสอบสัญญาณไซเรนเตือนภัย">
-          🔔
+
+        <button onclick="playSirenSound()" class="p-1.5 sm:p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 active:scale-95 transition" title="ทดสอบสัญญาณไซเรนเตือนภัย">
+          🔊
         </button>
-        <button id="btn-sync" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 active:scale-95 transition" title="รีเฟรชข้อมูลโทรมาตร & เรดาร์ทันที">
+
+        <button onclick="syncAllData()" class="p-1.5 sm:p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 active:scale-95 transition" title="รีเฟรชข้อมูลโทรมาตร & เรดาร์">
           🔄
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Scope Pills & Layer Toggles Bar -->
+    <div class="mt-2 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+      
+      <!-- Scope Selector Pills -->
+      <div class="flex items-center gap-1 overflow-x-auto hide-scrollbar py-0.5">
+        <span class="text-[11px] text-slate-400 font-semibold mr-1 flex items-center gap-1">
+          <span>🌐</span> ขอบเขต:
+        </span>
+        <button onclick="zoomToScope('thailand')" id="scope-thailand" class="scope-pill active px-2.5 py-1 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-600 font-medium hover:bg-cyan-900 transition flex items-center gap-1">
+          🇹🇭 ทั่วไทย
+        </button>
+        <button onclick="zoomToScope('global')" id="scope-global" class="scope-pill px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition flex items-center gap-1">
+          🌏 ทั่วโลก
+        </button>
+        <button onclick="zoomToScope('bkk')" id="scope-bkk" class="scope-pill px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition flex items-center gap-1">
+          🏙️ กทม.
+        </button>
+        <button onclick="zoomToScope('north')" id="scope-north" class="scope-pill px-2 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
+          ภาคเหนือ
+        </button>
+        <button onclick="zoomToScope('isan')" id="scope-isan" class="scope-pill px-2 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
+          ภาคอีสาน
+        </button>
+        <button onclick="zoomToScope('central')" id="scope-central" class="scope-pill px-2 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
+          ภาคกลาง
+        </button>
+        <button onclick="zoomToScope('south')" id="scope-south" class="scope-pill px-2 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
+          ภาคใต้
+        </button>
+        <button onclick="zoomToScope('east')" id="scope-east" class="scope-pill px-2 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
+          ภาคตะวันออก
+        </button>
+        <button onclick="zoomToScope('asean')" id="scope-asean" class="scope-pill px-2 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
+          อาเซียน
+        </button>
+        <button onclick="zoomToScope('east_asia')" id="scope-east_asia" class="scope-pill px-2 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
+          เอเชียตะวันออก
+        </button>
+      </div>
+
+      <!-- Layer Toggles -->
+      <div class="flex items-center gap-1 overflow-x-auto hide-scrollbar py-0.5">
+        <button id="toggle-radar" onclick="toggleRadarLayer()" class="layer-pill active px-2.5 py-1 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-500 shadow-md shadow-cyan-500/20 transition flex items-center gap-1 font-semibold">
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+          <span>เรดาร์ฝนโลก</span>
+        </button>
+        <button id="toggle-basins" class="layer-pill active px-2.5 py-1 rounded-lg bg-cyan-900/60 text-cyan-200 border border-cyan-600 transition flex items-center gap-1">
+          <span>🏞️ เขื่อน & แก้มลิง (41)</span>
+        </button>
+        <button id="toggle-hotspots" class="layer-pill active px-2.5 py-1 rounded-lg bg-rose-900/60 text-rose-200 border border-rose-600 transition flex items-center gap-1">
+          <span>⚠️ จุดเสี่ยงน้ำท่วม (36)</span>
+        </button>
+        <button id="toggle-stations" class="layer-pill active px-2.5 py-1 rounded-lg bg-purple-900/60 text-purple-200 border border-purple-600 transition flex items-center gap-1">
+          <span>📡 สถานีเรดาร์ (24)</span>
+        </button>
+        <button id="toggle-reports" class="layer-pill active px-2.5 py-1 rounded-lg bg-amber-900/60 text-amber-200 border border-amber-600 transition flex items-center gap-1">
+          <span>📸 รายงานเหตุ</span>
+        </button>
+        <button id="toggle-shelters" class="layer-pill active px-2.5 py-1 rounded-lg bg-blue-900/60 text-blue-200 border border-blue-600 transition flex items-center gap-1">
+          <span>🚗 จุดจอดรถหนีน้ำ</span>
         </button>
       </div>
 
     </div>
   </header>
 
-  <!-- ==========================================
-       SUB-BAR: FILTERS & QUICK REGIONS
-  =========================================== -->
-  <div class="relative z-20 flex-none glass-panel border-b border-slate-800/80 px-2 py-1 overflow-x-auto w-full">
-    <div class="w-max flex items-center justify-between gap-2 text-xs">
-      
-      <!-- Zone Quick Zoom Pills -->
-      <div class="flex items-center gap-1.5 flex-nowrap shrink-0">
-        <span class="text-[11px] text-slate-400 font-medium shrink-0 mr-1">🔍 ซูมโซน:</span>
-        <button onclick="zoomToZone('all')" class="zone-pill px-2.5 py-1 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-800 font-medium hover:bg-cyan-900 transition">
-          ทั่ว กทม.
-        </button>
-        <button onclick="zoomToZone('central')" class="zone-pill px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
-          พระนคร-สุขุมวิท
-        </button>
-        <button onclick="zoomToZone('thonburi')" class="zone-pill px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
-          ฝั่งธนบุรี
-        </button>
-        <button onclick="zoomToZone('kmitl')" class="zone-pill px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
-          🎓 ลาดกระบัง (KMITL)
-        </button>
-        <button onclick="zoomToZone('suvarnabhumi')" class="zone-pill px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
-          สนามบินสุวรรณภูมิ
-        </button>
-      </div>
-
-      <!-- Layer Toggle Filters -->
-      <div class="flex items-center gap-1.5 shrink-0 ml-auto">
-        <span class="text-[11px] text-slate-400 font-medium mr-1 hidden sm:inline">ชั้นข้อมูล:</span>
-        
-        <!-- Live Rain Radar Toggle Button -->
-        <button id="toggle-radar" onclick="toggleRadarLayer()" class="layer-pill active px-2.5 py-1 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-500 shadow-md shadow-cyan-500/20 transition flex items-center gap-1.5 font-semibold">
-          <span class="w-2 h-2 rounded-full bg-cyan-400 live-dot"></span>
-          <span>🌧️ เรดาร์ฝนสด</span>
-        </button>
-
-        <button id="toggle-basins" class="layer-pill active px-2.5 py-1 rounded-lg bg-cyan-900/60 text-cyan-200 border border-cyan-600 transition flex items-center gap-1">
-          <span>🏞️</span> แก้มลิง <span class="text-[10px] opacity-75 font-mono">(16)</span>
-        </button>
-        <button id="toggle-hotspots" class="layer-pill active px-2.5 py-1 rounded-lg bg-rose-900/60 text-rose-200 border border-rose-600 transition flex items-center gap-1">
-          <span>⚠️</span> จุดเสี่ยง <span class="text-[10px] opacity-75 font-mono">(22)</span>
-        </button>
-        <button id="toggle-reports" class="layer-pill active px-2.5 py-1 rounded-lg bg-amber-900/60 text-amber-200 border border-amber-600 transition flex items-center gap-1">
-          <span>📸</span> แจ้งเหตุ <span id="report-count-badge" class="text-[10px] opacity-75 font-mono">(4)</span>
-        </button>
-        <button id="toggle-shelters" class="layer-pill active px-2.5 py-1 rounded-lg bg-blue-900/60 text-blue-200 border border-blue-600 transition flex items-center gap-1">
-          <span>🅿️</span> ที่จอดรถ <span class="text-[10px] opacity-75 font-mono">(6)</span>
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ==========================================
-       MAIN VIEW CONTAINER (MAP & PANELS)
-  =========================================== -->
+  <!-- ================= MAIN CONTENT AREA ================= -->
   <main class="relative flex-1 w-full h-full overflow-hidden">
     
-    <!-- Leaflet Map Canvas -->
+    <!-- Map Container -->
     <div id="map"></div>
 
-    <!-- Floating HUD Summary Card (Top Right over map) -->
-    <div class="absolute top-3 right-3 z-10 hidden sm:flex flex-col gap-2 w-72 pointer-events-auto">
-      <div class="glass-panel rounded-2xl p-3.5 shadow-2xl border border-slate-700/80">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-bold text-slate-300">📊 สรุปความจุแก้มลิงรวม</span>
-          <span class="text-[11px] font-mono text-cyan-400 font-bold" id="hud-total-percent">71.8% เหลือว่าง</span>
-        </div>
-        <!-- Progress bar -->
-        <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden mb-2">
-          <div class="bg-gradient-to-r from-emerald-500 via-cyan-400 to-blue-500 h-2.5 rounded-full transition-all duration-700" style="width: 71.8%"></div>
-        </div>
-        <div class="flex justify-between text-[10px] text-slate-400">
-          <span>กักเก็บแล้ว: 4.88 ล้าน m³</span>
-          <span>ความจุสูงสุด: 17.3 ล้าน m³</span>
-        </div>
-        
-        <div class="border-t border-slate-800 mt-2.5 pt-2 flex items-center justify-between text-[11px]">
-          <span class="text-slate-400">จุดเสี่ยงวิกฤต (🔴):</span>
-          <span class="font-bold text-rose-400 bg-rose-950 px-2 py-0.5 rounded border border-rose-800" id="hud-critical-count">2 จุด</span>
-        </div>
-      </div>
+    <!-- Floating Quick Jump Bar on Map -->
+    <div class="absolute top-3 left-3 z-20 hidden md:flex items-center gap-1.5 p-1.5 rounded-2xl glass-panel shadow-2xl">
+      <span class="text-[10px] text-cyan-400 font-bold px-2">✈️ บินด่วน:</span>
+      <button onclick="quickJump(18.7883, 98.9853, 10, 'เชียงใหม่')" class="px-2 py-0.5 text-[11px] rounded-lg bg-slate-800/90 hover:bg-cyan-900 text-slate-200 border border-slate-700 transition">เชียงใหม่</button>
+      <button onclick="quickJump(16.4322, 102.8236, 10, 'ขอนแก่น')" class="px-2 py-0.5 text-[11px] rounded-lg bg-slate-800/90 hover:bg-cyan-900 text-slate-200 border border-slate-700 transition">ขอนแก่น</button>
+      <button onclick="quickJump(13.7563, 100.5618, 11, 'กรุงเทพมหานคร')" class="px-2 py-0.5 text-[11px] rounded-lg bg-slate-800/90 hover:bg-cyan-900 text-slate-200 border border-slate-700 transition">กทม.</button>
+      <button onclick="quickJump(7.0084, 100.4767, 11, 'หาดใหญ่ สงขลา')" class="px-2 py-0.5 text-[11px] rounded-lg bg-slate-800/90 hover:bg-cyan-900 text-slate-200 border border-slate-700 transition">หาดใหญ่</button>
+      <button onclick="quickJump(35.6762, 139.6503, 8, 'Tokyo, Japan')" class="px-2 py-0.5 text-[11px] rounded-lg bg-slate-800/90 hover:bg-cyan-900 text-slate-200 border border-slate-700 transition">Tokyo</button>
+      <button onclick="quickJump(1.3521, 103.8198, 11, 'Singapore')" class="px-2 py-0.5 text-[11px] rounded-lg bg-slate-800/90 hover:bg-cyan-900 text-slate-200 border border-slate-700 transition">Singapore</button>
+      <button onclick="quickJump(51.5074, -0.1278, 8, 'London, UK')" class="px-2 py-0.5 text-[11px] rounded-lg bg-slate-800/90 hover:bg-cyan-900 text-slate-200 border border-slate-700 transition">London</button>
     </div>
 
-    <!-- ==========================================
-         FLOATING MAP RADAR CONTROLLER (BOTTOM-LEFT)
-    =========================================== -->
-    <div id="radar-hud-controller" class="absolute bottom-3 left-3 z-20 flex flex-col gap-2 w-72 sm:w-80 pointer-events-auto transition-all duration-300">
-      <div class="glass-panel rounded-2xl p-3 shadow-2xl border border-cyan-500/40 text-xs space-y-2">
-        
-        <!-- Header & Toggle Status -->
-        <div class="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
-          <div class="flex items-center gap-1.5">
-            <span class="text-cyan-400 font-bold flex items-center gap-1">
-              <span>🌧️ เรดาร์กลุ่มฝนสด</span>
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 live-dot"></span>
-            </span>
-          </div>
-          <div class="flex items-center gap-1">
-            <span id="radar-time-label" class="font-mono font-bold text-cyan-300 text-[11px]">กำลังโหลด...</span>
-            <button onclick="toggleRadarHud(false)" class="text-slate-400 hover:text-white text-xs px-1">✕</button>
-          </div>
+    <!-- Floating Rain Radar HUD Player (Bottom Map) -->
+    <div id="radar-hud" class="absolute bottom-4 left-3 right-3 sm:left-6 sm:w-96 z-20 glass-panel rounded-2xl p-3 shadow-2xl border border-cyan-800/60 transition-all">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span class="text-xs font-bold text-cyan-300 tracking-wide uppercase">RainViewer Global Composite</span>
         </div>
+        <div class="flex items-center gap-1.5">
+          <span id="radar-time-label" class="text-[11px] font-mono text-cyan-200 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800">กำลังโหลด...</span>
+        </div>
+      </div>
 
-        <!-- Radar Animation Player Controls -->
-        <div class="space-y-1.5">
-          <div class="flex items-center gap-2">
-            <button id="btn-radar-play" onclick="toggleRadarPlay()" class="px-3 py-1 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-[11px] flex items-center gap-1 shadow-md shadow-cyan-600/30 transition">
-              <span id="radar-play-icon">▶️</span>
-              <span id="radar-play-text">เล่นวนลูป</span>
-            </button>
-            <input type="range" id="radar-slider" min="0" max="12" value="12" step="1" class="flex-1 accent-cyan-400 cursor-pointer h-1.5 bg-slate-800 rounded-lg" oninput="onRadarSliderChange(this.value)">
-          </div>
+      <!-- Controls Slider -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <button id="btn-radar-play" onclick="toggleRadarPlay()" class="px-3 py-1 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-[11px] flex items-center gap-1 shadow-md shadow-cyan-600/30 transition">
+            <span id="play-icon">▶</span>
+            <span id="play-text">เล่นลูป</span>
+          </button>
           
-          <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono">
-            <span>อดีต 2 ชม.</span>
-            <span class="text-cyan-300 font-bold" id="radar-frame-status">เฟรมสดล่าสุด (Real-time)</span>
-            <span>สด</span>
-          </div>
+          <input 
+            type="range" 
+            id="radar-slider" 
+            min="0" 
+            max="12" 
+            value="12" 
+            class="flex-1 accent-cyan-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+            oninput="handleRadarSlider(this.value)"
+          />
+          
+          <select id="radar-speed" onchange="setRadarSpeed(this.value)" class="bg-slate-900 border border-slate-700 text-slate-300 text-[10px] rounded px-1.5 py-0.5 focus:outline-none">
+            <option value="1000">1x</option>
+            <option value="500">2x</option>
+            <option value="1500">0.5x</option>
+          </select>
         </div>
 
-        <!-- Opacity & Scale Legend -->
-        <div class="pt-1 border-t border-slate-800/70 space-y-1.5">
-          <div class="flex items-center justify-between text-[10px] text-slate-400">
-            <span>ความโปร่งแสงเรดาร์:</span>
-            <input type="range" id="radar-opacity" min="20" max="100" value="75" step="5" class="w-28 accent-cyan-400 h-1 bg-slate-800 rounded" oninput="onRadarOpacityChange(this.value)">
-            <span id="opacity-val" class="font-mono text-cyan-300">75%</span>
+        <!-- dBZ Rain Intensity Legend Bar -->
+        <div class="pt-1">
+          <div class="flex items-center justify-between text-[9px] text-slate-400 mb-1">
+            <span>เบา (10 dBZ)</span>
+            <span>ปานกลาง (35)</span>
+            <span>หนัก (50)</span>
+            <span class="text-rose-400 font-bold">พายุรุนแรง (&gt;65)</span>
           </div>
-
-          <!-- Color scale legend -->
-          <div class="space-y-0.5">
-            <div class="flex justify-between text-[9px] text-slate-400">
-              <span>ความแรง:</span>
-              <span class="text-emerald-400">เบา</span>
-              <span class="text-yellow-400">ปานกลาง</span>
-              <span class="text-orange-400">หนัก</span>
-              <span class="text-rose-400">หนักมาก</span>
-            </div>
-            <div class="w-full h-2 rounded-full overflow-hidden bg-gradient-to-r from-emerald-400 via-yellow-400 via-orange-500 to-rose-600 opacity-90 border border-slate-700"></div>
-          </div>
-
-          <!-- Radar Station Badges -->
-          <div class="flex items-center justify-between pt-1 text-[9px] text-slate-400">
-            <span class="flex items-center gap-0.5"><span class="w-1 h-1 rounded-full bg-cyan-400"></span> หนองจอก</span>
-            <span class="flex items-center gap-0.5"><span class="w-1 h-1 rounded-full bg-cyan-400"></span> หนองแขม</span>
-            <span class="flex items-center gap-0.5"><span class="w-1 h-1 rounded-full bg-cyan-400"></span> สุวรรณภูมิ</span>
-          </div>
+          <div class="h-2 rounded-full w-full bg-gradient-to-r from-emerald-500 via-yellow-400 via-orange-500 to-fuchsia-600 opacity-90"></div>
         </div>
-
       </div>
     </div>
 
-    <!-- ==========================================
-         TAB 2: สมดุล 3 น้ำ (Hydrology View)
-    =========================================== -->
+    <!-- ================= PANEL VIEWS (TABS) ================= -->
+
+    <!-- VIEW 1: HYDRO & DAMS DASHBOARD -->
     <div id="view-hydro" class="panel-view absolute inset-0 z-20 bg-[#070a12]/95 backdrop-blur-xl p-4 sm:p-6 overflow-y-auto hidden">
-      <div class="max-w-5xl mx-auto space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+      <div class="max-w-6xl mx-auto space-y-6 pb-20">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
           <div>
             <h2 class="text-xl font-bold text-white flex items-center gap-2">
-              <span>📊</span> สมดุล 3 น้ำ และเกณฑ์บริหารจัดการน้ำท่วม กทม.
+              <span>📊</span> โทรมาตรเขื่อน ลุ่มน้ำทั่วไทย และสภาพอากาศโลก
             </h2>
-            <p class="text-xs text-slate-400">แบบจำลองวิเคราะห์อุทกศาสตร์ แม่น้ำเจ้าพระยา - คลองสายหลัก - ทะเลอ่าวไทย</p>
+            <p class="text-xs text-slate-400">เกณฑ์การบริหารจัดการน้ำ 35 เขื่อนหลัก, ดัชนีน้ำ 3 น้ำ กทม., และการติดตามพายุหมุนเขตร้อนทั่วโลก</p>
           </div>
-          <button onclick="switchTab('map')" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition">
+          <button onclick="switchTab('map')" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition flex items-center gap-1 self-start">
             ✕ ปิดหน้าต่าง
           </button>
         </div>
 
-        <!-- 3 Water Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- น้ำเหนือ -->
-          <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">1. น้ำเหนือ (Upstream Runoff)</span>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-300 border border-emerald-800">ปลอดภัย</span>
+        <!-- Sub Tabs in Hydro -->
+        <div class="flex gap-2 border-b border-slate-800 pb-2">
+          <button onclick="switchHydroTab('dams')" id="hydro-tab-dams" class="px-3 py-1.5 rounded-xl bg-cyan-950 text-cyan-300 border border-cyan-600 font-semibold text-xs transition">
+            🇹🇭 35 เขื่อนหลัก & ลุ่มน้ำไทย
+          </button>
+          <button onclick="switchHydroTab('bkk3water')" id="hydro-tab-bkk3water" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-slate-200 text-xs transition">
+            🏙️ ดัชนีสมดุล 3 น้ำ (กทม.)
+          </button>
+          <button onclick="switchHydroTab('globalclimate')" id="hydro-tab-globalclimate" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-slate-200 text-xs transition">
+            🌏 พายุ & สภาพอากาศโลก
+          </button>
+        </div>
+
+        <!-- SUB VIEW 1: DAMS & RIVER BASINS -->
+        <div id="hydro-sub-dams" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="p-4 rounded-2xl glass-panel border border-cyan-800/40">
+              <span class="text-xs text-slate-400">ปริมาณน้ำกักเก็บรวม 35 เขื่อนหลัก</span>
+              <div class="text-2xl font-extrabold text-cyan-300 font-mono mt-1">54,820 <span class="text-xs font-normal">ล้าน ลบ.ม.</span></div>
+              <div class="text-[11px] text-emerald-400 mt-1">● 77% ของความจุรวม (อยู่ในเกณฑ์ควบคุม)</div>
             </div>
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-black font-mono text-white" id="hydro-flow">1,376</span>
-              <span class="text-sm text-slate-400">ลูกบาศก์เมตร/วินาที</span>
+            <div class="p-4 rounded-2xl glass-panel border border-blue-800/40">
+              <span class="text-xs text-slate-400">อัตราน้ำไหลผ่าน C.2 นครสวรรค์</span>
+              <div class="text-2xl font-extrabold text-blue-300 font-mono mt-1">1,680 <span class="text-xs font-normal">ลบ.ม./วินาที</span></div>
+              <div class="text-[11px] text-slate-400 mt-1">เกณฑ์เฝ้าระวัง &gt; 2,000 ลบ.ม./วิ</div>
             </div>
-            <div class="text-xs text-slate-300 space-y-1">
-              <p>📍 สถานีวัดน้ำ: <span class="font-medium text-white">C.35 บ้านป้อม / C.13 บางไทร</span></p>
-              <p>⚠️ เกณฑ์แจ้งเตือนภัย: <span class="text-amber-400 font-mono">1,500 m³/s</span></p>
-              <p>🚨 เกณฑ์วิกฤตล้นคันกั้น: <span class="text-rose-400 font-mono">2,500 m³/s</span></p>
+            <div class="p-4 rounded-2xl glass-panel border border-amber-800/40">
+              <span class="text-xs text-slate-400">อัตราปล่อยท้ายเขื่อนเจ้าพระยา (C.13)</span>
+              <div class="text-2xl font-extrabold text-amber-300 font-mono mt-1">1,450 <span class="text-xs font-normal">ลบ.ม./วินาที</span></div>
+              <div class="text-[11px] text-amber-400 mt-1">⚠️ ท้ายเขื่อนน้ำปริ่มตลิ่งนอกคัน</div>
             </div>
-            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-              <div class="bg-emerald-500 h-2 rounded-full" style="width: 55%"></div>
+            <div class="p-4 rounded-2xl glass-panel border border-indigo-800/40">
+              <span class="text-xs text-slate-400">จุดวัด C.29A บางไทร (ไหลสู่ กทม.)</span>
+              <div class="text-2xl font-extrabold text-indigo-300 font-mono mt-1">1,820 <span class="text-xs font-normal">ลบ.ม./วินาที</span></div>
+              <div class="text-[11px] text-emerald-400 mt-1">ปลอดภัย (รับได้สูงสุด 3,500 ลบ.ม./วิ)</div>
             </div>
-            <p class="text-[11px] text-slate-400">อัตราการไหลปัจจุบันยังอยู่ในเกณฑ์ควบคุมได้ คันกั้นน้ำ กทม. รองรับได้สูงสุด 3,500 m³/s</p>
           </div>
 
-          <!-- น้ำฝน -->
-          <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">2. น้ำฝน (Precipitation)</span>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-cyan-950 text-cyan-300 border border-cyan-800">สแกนเรดาร์สด</span>
+          <!-- Top Dams Progress Grid -->
+          <div class="p-5 rounded-2xl glass-panel border border-slate-800">
+            <h3 class="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
+              <span>🏞️</span> สรุปปริมาตรน้ำ 12 เขื่อนยุทธศาสตร์ระดับประเทศ
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="top-dams-container">
+              <!-- Dynamically populated -->
             </div>
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-black font-mono text-white">0.0</span>
-              <span class="text-sm text-slate-400">มม./ชม.</span>
-            </div>
-            <div class="text-xs text-slate-300 space-y-1">
-              <p>📡 เรดาร์ตรวจจับ: <span class="font-medium text-white">เรดาร์หนองจอก & เรดาร์หนองแขม</span></p>
-              <p>🌧️ ฝนสะสม 24 ชม.: <span class="font-mono text-cyan-400">24.5 มม.</span></p>
-              <p>⚡ โอกาสฝนตกช่วงค่ำ: <span class="font-mono text-amber-400">40% ในเขตตะวันออก</span></p>
-            </div>
-            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-              <div class="bg-sky-500 h-2 rounded-full" style="width: 15%"></div>
-            </div>
-            <button onclick="switchTab('radar')" class="w-full py-1.5 rounded-xl bg-cyan-950 hover:bg-cyan-900 border border-cyan-800 text-cyan-300 text-[11px] font-semibold transition flex items-center justify-center gap-1">
-              <span>🌧️</span> เปิดดูเรดาร์กลุ่มฝนสด
-            </button>
-          </div>
-
-          <!-- น้ำหนุน -->
-          <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">3. น้ำทะเลหนุน (High Tide)</span>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-950 text-amber-300 border border-amber-800">ช่วงเฝ้าระวัง</span>
-            </div>
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-black font-mono text-white">+1.05</span>
-              <span class="text-sm text-slate-400">ม.รสม.</span>
-            </div>
-            <div class="text-xs text-slate-300 space-y-1">
-              <p>📍 สถานีวัด: <span class="font-medium text-white">ป้อมพระจุลจอมเกล้า (กรมอุทกศาสตร์)</span></p>
-              <p>⏰ สูงสุดถัดไป: <span class="text-amber-400 font-mono">19:30 น. (+1.25 ม.)</span></p>
-              <p>🚨 ระดับเตือนภัยริมตลิ่ง: <span class="text-rose-400 font-mono">+1.80 ม.รสม.</span></p>
-            </div>
-            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-              <div class="bg-amber-400 h-2 rounded-full" style="width: 60%"></div>
-            </div>
-            <p class="text-[11px] text-slate-400">ชุมชนนอกคันกั้นน้ำริมเจ้าพระยาควรเฝ้าระวังน้ำเอ่อล้นตามท่อระบายน้ำ</p>
           </div>
         </div>
 
-        <!-- Telemetry Data Sync Info -->
-        <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🏛️</span>
-            <div>
-              <p class="font-bold text-slate-200">แหล่งข้อมูลโทรมาตรทางการ</p>
-              <p class="text-slate-400 text-[11px]" id="hydro-source">สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน) สสน. & สำนักการระบายน้ำ กทม.</p>
+        <!-- SUB VIEW 2: BKK 3-WATER BALANCE -->
+        <div id="hydro-sub-bkk3water" class="space-y-4 hidden">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-5 rounded-2xl glass-panel border border-blue-900/40 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-blue-400">1. น้ำเหนือ (เจ้าพระยา)</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800">เฝ้าระวัง</span>
+              </div>
+              <div class="text-3xl font-extrabold text-white font-mono">1,820 <span class="text-xs font-normal text-slate-400">ลบ.ม./วินาที</span></div>
+              <p class="text-xs text-slate-300">วัดที่จุดตรวจวัดบางไทร (C.29A) กทม. รับน้ำได้สูงสุด 3,500 ลบ.ม./วินาที</p>
+            </div>
+            <div class="p-5 rounded-2xl glass-panel border border-cyan-900/40 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-cyan-400">2. น้ำหนุน (ทะเลอ่าวไทย)</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">หนุนสูงช่วงค่ำ</span>
+              </div>
+              <div class="text-3xl font-extrabold text-white font-mono">+1.65 <span class="text-xs font-normal text-slate-400">ม.รทก.</span></div>
+              <p class="text-xs text-slate-300">ระดับคันกั้นน้ำ กทม. สูง +2.8 ถึง +3.5 ม.รทก. แนวเขื่อนรับได้ปกติ</p>
+            </div>
+            <div class="p-5 rounded-2xl glass-panel border border-indigo-900/40 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-indigo-400">3. น้ำฝน (สะสม 24 ชม.)</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">ฝนตกปานกลาง</span>
+              </div>
+              <div class="text-3xl font-extrabold text-white font-mono">48.5 <span class="text-xs font-normal text-slate-400">มม.</span></div>
+              <p class="text-xs text-slate-300">กลุ่มฝนตกสะสมแถบลาดกระบัง หนองจอก และบางนา ระบบสูบเร่งระบายลงแก้มลิง</p>
             </div>
           </div>
-          <button onclick="fetchTelemetry()" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-xs flex items-center gap-1.5 transition">
-            <span>🔄</span> ดึงข้อมูลโทรมาตรล่าสุด
+        </div>
+
+        <!-- SUB VIEW 3: GLOBAL CLIMATE & STORMS -->
+        <div id="hydro-sub-globalclimate" class="space-y-4 hidden">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-5 rounded-2xl glass-panel border border-slate-800 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-emerald-400">🌀 มรสุมและร่องความกดอากาศต่ำ (ITCZ)</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300">Active</span>
+              </div>
+              <p class="text-xs text-slate-300">ร่องมรสุมพาดผ่านภาคใต้ตอนบนและอ่าวไทยตอนบน ทำให้เกิดฝนตกชุกและคลื่นลมแรงในทะเลอันดามัน</p>
+            </div>
+            <div class="p-5 rounded-2xl glass-panel border border-slate-800 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-cyan-400">🌡️ ปรากฏการณ์ ENSO (La Niña / El Niño)</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300">Neutral - Weak La Niña</span>
+              </div>
+              <p class="text-xs text-slate-300">สภาวะลานีญากำลังอ่อน ส่งผลให้ปริมาณฝนในภูมิภาคเอเชียตะวันออกเฉียงใต้สูงกว่าค่าเฉลี่ยปกติประมาณ 5-10%</p>
+            </div>
+            <div class="p-5 rounded-2xl glass-panel border border-slate-800 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-purple-400">🌊 อุณหภูมิผิวน้ำทะเล (SST)</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-purple-950 text-purple-300">29.4 °C</span>
+              </div>
+              <p class="text-xs text-slate-300">อุณหภูมิในทะเลจีนใต้และอ่าวไทยอบอุ่น เอื้อต่อการก่อตัวของหย่อมความกดอากาศต่ำกำลังแรง</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- VIEW 2: FULL RADAR OVERVIEW -->
+    <div id="view-radar" class="panel-view absolute inset-0 z-20 bg-[#070a12]/95 backdrop-blur-xl p-4 sm:p-6 overflow-y-auto hidden">
+      <div class="max-w-5xl mx-auto space-y-6 pb-20">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <span>🌧️</span> เรดาร์ตรวจจับกลุ่มฝนและพายุทั่วโลก (RainViewer Composite)
+            </h2>
+            <p class="text-xs text-slate-400">ประมวลผลสัญญาณสะท้อนคลื่นวิทยุ Doppler จากสถานีตรวจอากาศทั่วโลก ทุก 10 นาที</p>
+          </div>
+          <button onclick="switchTab('map')" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition">
+            ✕ ดูบนแผนที่
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-2xl glass-panel border border-cyan-800/50 space-y-2">
+            <span class="text-xs text-cyan-400 font-bold">📡 ขอบเขตการตรวจวัด (Global Coverage)</span>
+            <p class="text-xs text-slate-300">ครอบคลุมเครือข่ายเรดาร์ตรวจอากาศกว่า 1,000+ สถานีทั่วโลก รวมถึงเรดาร์ TMD ประเทศไทย 15 สถานีหลัก</p>
+          </div>
+          <div class="p-4 rounded-2xl glass-panel border border-blue-800/50 space-y-2">
+            <span class="text-xs text-blue-400 font-bold">⏱️ ความถี่การอัปเดต (Refresh Rate)</span>
+            <p class="text-xs text-slate-300">ดึงข้อมูลเฟรมใหม่ทุก 10 นาที พร้อมโหมดพยากรณ์ล่วงหน้า (Nowcasting) คำนวณเวกเตอร์ลมพัดกลุ่มเมฆ</p>
+          </div>
+          <div class="p-4 rounded-2xl glass-panel border border-purple-800/50 space-y-2">
+            <span class="text-xs text-purple-400 font-bold">🎨 มาตรฐานการวัดความเข้ม (dBZ)</span>
+            <p class="text-xs text-slate-300">แสดงผลเฉดสีมาตรฐานสากล: เขียว (ฝนปรอย) &gt; เหลือง (ปานกลาง) &gt; ส้ม/แดง (ฝนหนัก) &gt; ม่วง (พายุลูกเห็บ/รุนแรง)</p>
+          </div>
+        </div>
+
+        <div class="text-center pt-4">
+          <button onclick="toggleRadarLayer(true); switchTab('map')" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-cyan-600/30 transition">
+            🚀 เปิดหน้าจอเรดาร์สดแบบเต็มตาบนแผนที่โลก
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ==========================================
-         TAB 3: เรดาร์กลุ่มฝนสด (Rain Radar View)
-    =========================================== -->
-    <div id="view-radar" class="panel-view absolute inset-0 z-20 bg-[#070a12]/95 backdrop-blur-xl p-4 sm:p-6 overflow-y-auto hidden">
-      <div class="max-w-6xl mx-auto space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-          <div>
-            <h2 class="text-xl font-bold text-white flex items-center gap-2">
-              <span>🌧️</span> เรดาร์ตรวจจับกลุ่มฝนและกลุ่มเมฆฝน กทม. & ปริมณฑล
-            </h2>
-            <p class="text-xs text-slate-400">ภาพถ่ายโทรมาตรเรดาร์สแกนสด 3 สถานีหลัก พร้อมระบบวนลูปวิเคราะห์การเคลื่อนตัวของกลุ่มฝน</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="toggleRadarLayer(true); switchTab('map')" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-lg shadow-cyan-600/20 transition">
-              <span>🗺️</span> ดูเรดาร์บนแผนที่สด
-            </button>
-            <button onclick="switchTab('map')" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition">
-              ✕ ปิด
-            </button>
-          </div>
-        </div>
-
-        <!-- Radar Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          
-          <!-- Radar Station 1: Nong Chok -->
-          <div class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="text-lg">📡</span>
-                <div>
-                  <h4 class="font-bold text-white text-sm">สถานีเรดาร์หนองจอก</h4>
-                  <p class="text-[10px] text-slate-400">สำนักการระบายน้ำ กทม. (รัศมี 120 กม.)</p>
-                </div>
-              </div>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-300 border border-emerald-800">ONLINE</span>
-            </div>
-            <div class="rounded-xl overflow-hidden border border-slate-700 bg-slate-950 relative group">
-              <img src="https://weather.bangkok.go.th/radar/RadarAnimation.aspx" onerror="this.src='https://tilecache.rainviewer.com/v2/radar/ca4cb05732aa/512/7/102/59/2/1_1.png'" alt="เรดาร์หนองจอก" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-              <span class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/80 text-[10px] text-cyan-300 font-mono backdrop-blur">
-                ตรวจจับโซน: ตะวันออก, มีนบุรี, ลาดกระบัง
-              </span>
-            </div>
-            <div class="flex justify-between text-xs text-slate-300">
-              <span>สถานะกลุ่มฝน:</span>
-              <span class="font-mono text-emerald-400 font-bold">ไม่พบกลุ่มฝนหนาแน่น</span>
-            </div>
-          </div>
-
-          <!-- Radar Station 2: Nong Khaem -->
-          <div class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="text-lg">📡</span>
-                <div>
-                  <h4 class="font-bold text-white text-sm">สถานีเรดาร์หนองแขม</h4>
-                  <p class="text-[10px] text-slate-400">สำนักการระบายน้ำ กทม. (รัศมี 120 กม.)</p>
-                </div>
-              </div>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-300 border border-emerald-800">ONLINE</span>
-            </div>
-            <div class="rounded-xl overflow-hidden border border-slate-700 bg-slate-950 relative group">
-              <img src="https://weather.bangkok.go.th/radar/RadarNKAnimation.aspx" onerror="this.src='https://tilecache.rainviewer.com/v2/radar/ca4cb05732aa/512/7/102/59/2/1_1.png'" alt="เรดาร์หนองแขม" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-              <span class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/80 text-[10px] text-cyan-300 font-mono backdrop-blur">
-                ตรวจจับโซน: ฝั่งธนบุรี, ภาษีเจริญ, บางแค
-              </span>
-            </div>
-            <div class="flex justify-between text-xs text-slate-300">
-              <span>สถานะกลุ่มฝน:</span>
-              <span class="font-mono text-emerald-400 font-bold">ท้องฟ้าโปร่ง ปกติ</span>
-            </div>
-          </div>
-
-          <!-- Radar Station 3: Suvarnabhumi Airport -->
-          <div class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="text-lg">✈️</span>
-                <div>
-                  <h4 class="font-bold text-white text-sm">สถานีเรดาร์สุวรรณภูมิ</h4>
-                  <p class="text-[10px] text-slate-400">กรมอุตุนิยมวิทยา TMD (รัศมี 240 กม.)</p>
-                </div>
-              </div>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-300 border border-emerald-800">ONLINE</span>
-            </div>
-            <div class="rounded-xl overflow-hidden border border-slate-700 bg-slate-950 relative group">
-              <img src="https://weather.bangkok.go.th/radar/RadarSVAnimation.aspx" onerror="this.src='https://tilecache.rainviewer.com/v2/radar/ca4cb05732aa/512/7/102/59/2/1_1.png'" alt="เรดาร์สุวรรณภูมิ" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
-              <span class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/80 text-[10px] text-cyan-300 font-mono backdrop-blur">
-                ตรวจจับโซน: สุวรรณภูมิ, บางนา, สมุทรปราการ
-              </span>
-            </div>
-            <div class="flex justify-between text-xs text-slate-300">
-              <span>สถานะกลุ่มฝน:</span>
-              <span class="font-mono text-emerald-400 font-bold">ความเข้มข้นปกติ</span>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Rainfall By District Summary -->
-        <div class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
-          <h4 class="font-bold text-sm text-white flex items-center gap-2">
-            <span>📊</span> ปริมาณน้ำฝนสะสมรายเขตยุทธศาสตร์ (มม.)
-          </h4>
-          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
-            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-              <p class="text-slate-400 text-[11px]">เขตลาดกระบัง (KMITL)</p>
-              <p class="text-lg font-mono font-bold text-cyan-300 mt-1">0.0 <span class="text-[10px] text-slate-500">มม.</span></p>
-              <span class="text-[10px] text-emerald-400">ระดับปกติ</span>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-              <p class="text-slate-400 text-[11px]">เขตพระนคร-สุขุมวิท</p>
-              <p class="text-lg font-mono font-bold text-cyan-300 mt-1">0.0 <span class="text-[10px] text-slate-500">มม.</span></p>
-              <span class="text-[10px] text-emerald-400">ระดับปกติ</span>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-              <p class="text-slate-400 text-[11px]">เขตจตุจักร-พหลโยธิน</p>
-              <p class="text-lg font-mono font-bold text-cyan-300 mt-1">0.0 <span class="text-[10px] text-slate-500">มม.</span></p>
-              <span class="text-[10px] text-emerald-400">ระดับปกติ</span>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-              <p class="text-slate-400 text-[11px]">เขตประเวศ (บึงหนองบอน)</p>
-              <p class="text-lg font-mono font-bold text-cyan-300 mt-1">0.0 <span class="text-[10px] text-slate-500">มม.</span></p>
-              <span class="text-[10px] text-emerald-400">ระดับปกติ</span>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-              <p class="text-slate-400 text-[11px]">เขตบางนา-ศรีนครินทร์</p>
-              <p class="text-lg font-mono font-bold text-cyan-300 mt-1">0.0 <span class="text-[10px] text-slate-500">มม.</span></p>
-              <span class="text-[10px] text-emerald-400">ระดับปกติ</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ==========================================
-         TAB 4: แก้มลิง 16 แห่ง (Basins Matrix)
-    =========================================== -->
+    <!-- VIEW 3: DAMS & BASINS GRID -->
     <div id="view-basins" class="panel-view absolute inset-0 z-20 bg-[#070a12]/95 backdrop-blur-xl p-4 sm:p-6 overflow-y-auto hidden">
-      <div class="max-w-6xl mx-auto space-y-4">
+      <div class="max-w-6xl mx-auto space-y-6 pb-20">
+        
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
           <div>
             <h2 class="text-xl font-bold text-white flex items-center gap-2">
-              <span>🏞️</span> โครงข่ายแก้มลิงรองรับน้ำท่วม 16 แห่ง กทม.
+              <span>🏞️</span> โครงข่ายเขื่อนหลักระดับประเทศ 25 แห่ง & แก้มลิง กทม. 16 แห่ง
             </h2>
-            <p class="text-xs text-slate-400">ตรวจสอบความจุที่เหลือ และสั่งการพร่องน้ำล่วงหน้าเพื่อเตรียมรับน้ำฝน</p>
+            <p class="text-xs text-slate-400">ตรวจสอบความจุกักเก็บ อัตราการระบายน้ำ และพื้นที่รับน้ำ</p>
           </div>
-          <div class="flex items-center gap-2">
-            <input type="text" id="basin-search" placeholder="ค้นหาชื่อแก้มลิง หรือเขต..." class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 w-52">
-            <button onclick="switchTab('map')" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition">
-              ✕ แผนที่
-            </button>
-          </div>
+          <button onclick="switchTab('map')" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition">
+            ✕ กลับสู่แผนที่
+          </button>
         </div>
 
-        <!-- Basins Grid -->
-        <div id="basins-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-          <!-- Populated by JavaScript -->
+        <!-- Filter bar -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap gap-1 text-xs">
+            <button onclick="filterBasins('all')" class="basin-filter-btn active px-3 py-1 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-600">ทั้งหมด (41 แห่ง)</button>
+            <button onclick="filterBasins('dam')" class="basin-filter-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">เขื่อนทั่วประเทศ (25)</button>
+            <button onclick="filterBasins('basin')" class="basin-filter-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">แก้มลิง กทม. (16)</button>
+            <button onclick="filterBasins('north')" class="basin-filter-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">ภาคเหนือ</button>
+            <button onclick="filterBasins('isan')" class="basin-filter-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">ภาคอีสาน</button>
+            <button onclick="filterBasins('central')" class="basin-filter-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">ภาคกลาง</button>
+            <button onclick="filterBasins('south')" class="basin-filter-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">ภาคใต้</button>
+          </div>
+          <input 
+            type="text" 
+            id="basin-search" 
+            placeholder="ค้นหาชื่อเขื่อน / แก้มลิง / จังหวัด..." 
+            class="px-3 py-1 text-xs rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+            oninput="renderBasinsGrid()"
+          />
         </div>
+
+        <!-- Basins Grid Container -->
+        <div id="basins-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <!-- Dynamically populated -->
+        </div>
+
       </div>
     </div>
 
-    <!-- ==========================================
-         TAB 5: จุดเสี่ยง 22 จุด (Hotspots Matrix)
-    =========================================== -->
+    <!-- VIEW 4: FLOOD HOTSPOTS GRID -->
     <div id="view-hotspots" class="panel-view absolute inset-0 z-20 bg-[#070a12]/95 backdrop-blur-xl p-4 sm:p-6 overflow-y-auto hidden">
-      <div class="max-w-6xl mx-auto space-y-4">
+      <div class="max-w-6xl mx-auto space-y-6 pb-20">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
           <div>
             <h2 class="text-xl font-bold text-white flex items-center gap-2">
-              <span>⚠️</span> 22 จุดเสี่ยงน้ำท่วมและน้ำรอระบายหลัก กทม.
+              <span>⚠️</span> จุดเสี่ยงน้ำท่วมและน้ำหลากทั่วประเทศ (36 จุดสำคัญ)
             </h2>
-            <p class="text-xs text-slate-400">สถานะความลึกน้ำท่วมขัง (ซม.), สภาพการจราจร, และการเดินเครื่องสูบน้ำ</p>
+            <p class="text-xs text-slate-400">จุดลุ่มต่ำ จุดน้ำรอระบายถนนสายหลัก กทม. และพื้นที่เสี่ยงน้ำท่วมฉับพลันต่างจังหวัด</p>
           </div>
-          <div class="flex items-center gap-2">
-            <select id="hotspot-filter" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-rose-500">
-              <option value="all">ระดับเสี่ยงทั้งหมด</option>
-              <option value="critical">🔴 วิกฤต (&ge;15 cm)</option>
-              <option value="warning">🟠 เฝ้าระวัง (&lt;15 cm)</option>
-              <option value="normal">🟢 แห้งปกติ</option>
-            </select>
-            <button onclick="switchTab('map')" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition">
-              ✕ แผนที่
-            </button>
+          <button onclick="switchTab('map')" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition">
+            ✕ กลับสู่แผนที่
+          </button>
+        </div>
+
+        <!-- Filter -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap gap-1 text-xs">
+            <button onclick="filterHotspots('all')" class="hotspot-filter-btn active px-3 py-1 rounded-lg bg-rose-950 text-rose-300 border border-rose-600">ทั้งหมด (36)</button>
+            <button onclick="filterHotspots('upcountry')" class="hotspot-filter-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">ต่างจังหวัด (14)</button>
+            <button onclick="filterHotspots('bkk')" class="hotspot-filter-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">กทม. (22)</button>
+            <button onclick="filterHotspots('critical')" class="hotspot-filter-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">วิกฤต/ท่วมขัง</button>
+            <button onclick="filterHotspots('warning')" class="hotspot-filter-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">เฝ้าระวัง</button>
           </div>
         </div>
 
-        <!-- Hotspots Table/Grid -->
-        <div id="hotspots-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-          <!-- Populated by JavaScript -->
+        <!-- Hotspots Grid Container -->
+        <div id="hotspots-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <!-- Dynamically populated -->
         </div>
       </div>
     </div>
 
-    <!-- ==========================================
-         TAB 6: แจ้งเหตุสด & ภาพถ่าย (Citizen Reports Feed)
-    =========================================== -->
+    <!-- VIEW 5: CITIZEN REPORTS FEED -->
     <div id="view-reports" class="panel-view absolute inset-0 z-20 bg-[#070a12]/95 backdrop-blur-xl p-4 sm:p-6 overflow-y-auto hidden">
-      <div class="max-w-5xl mx-auto space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+      <div class="max-w-4xl mx-auto space-y-6 pb-20">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
           <div>
             <h2 class="text-xl font-bold text-white flex items-center gap-2">
               <span>📸</span> รายงานสถานการณ์น้ำท่วมจากประชาชน (Citizen Reports)
             </h2>
-            <p class="text-xs text-slate-400">ข้อมูลภาพถ่ายและระดับน้ำท่วมจริงแบบเรียลไทม์ พร้อมการคำนวณเวลาอัตโนมัติ</p>
+            <p class="text-xs text-slate-400">ภาพถ่าย พิกัด และระดับน้ำที่ส่งเข้ามาแบบเรียลไทม์ทั่วประเทศ</p>
           </div>
           <div class="flex items-center gap-2">
             <button onclick="openReportModal()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-lg shadow-cyan-600/20 transition">
-              <span>➕</span> ส่งรายงานจุดน้ำท่วม
+              <span>➕</span> ส่งรายงานใหม่
             </button>
             <button onclick="switchTab('map')" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition">
               ✕ แผนที่
@@ -717,391 +599,489 @@
           </div>
         </div>
 
-        <!-- Reports Feed Grid -->
-        <div id="reports-feed-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-          <!-- Populated by JavaScript -->
+        <div id="reports-feed-container" class="space-y-3">
+          <!-- Dynamically populated -->
         </div>
       </div>
     </div>
 
   </main>
 
-  <!-- ==========================================
-       BOTTOM COMMAND DOCK (NAVIGATION BAR)
-  =========================================== -->
+  <!-- ================= BOTTOM DOCK NAVIGATION ================= -->
   <footer class="relative z-30 flex-none glass-panel border-t border-slate-800/90 py-1 px-1 sm:px-3 w-full">
-    <div class="max-w-2xl mx-auto grid grid-cols-6 gap-0.5 sm:gap-1 text-center">
-      
-      <!-- Dock Item 1: Map -->
-      <button onclick="switchTab('map')" id="dock-map" class="dock-btn active flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl transition text-cyan-400">
-        <span class="text-base sm:text-lg">🗺️</span>
-        <span class="text-[10px] sm:text-[11px] font-semibold leading-tight">แผนที่สด</span>
+    <div class="flex items-center justify-around max-w-2xl mx-auto text-[11px] font-semibold">
+      <button onclick="switchTab('map')" id="dock-map" class="dock-btn active flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition text-cyan-400">
+        <span class="text-lg">🗺️</span>
+        <span>แผนที่สด</span>
       </button>
-
-      <!-- Dock Item 2: Rain Radar -->
-      <button onclick="switchTab('radar')" id="dock-radar" class="dock-btn flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl transition text-slate-400 hover:text-cyan-300">
-        <span class="text-base sm:text-lg">🌧️</span>
-        <span class="text-[10px] sm:text-[11px] font-medium leading-tight">เรดาร์ฝน</span>
+      <button onclick="switchTab('radar')" id="dock-radar" class="dock-btn flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition text-slate-400 hover:text-cyan-300">
+        <span class="text-lg">🌧️</span>
+        <span>เรดาร์โลก</span>
       </button>
-
-      <!-- Dock Item 3: Hydro Balance -->
-      <button onclick="switchTab('hydro')" id="dock-hydro" class="dock-btn flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl transition text-slate-400 hover:text-slate-200">
-        <span class="text-base sm:text-lg">📊</span>
-        <span class="text-[10px] sm:text-[11px] font-medium leading-tight">สมดุล 3 น้ำ</span>
+      <button onclick="switchTab('hydro')" id="dock-hydro" class="dock-btn flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition text-slate-400 hover:text-slate-200">
+        <span class="text-lg">📊</span>
+        <span>โทรมาตรน้ำ</span>
       </button>
-
-      <!-- Dock Item 4: Basins -->
-      <button onclick="switchTab('basins')" id="dock-basins" class="dock-btn flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl transition text-slate-400 hover:text-slate-200">
-        <span class="text-base sm:text-lg">🏞️</span>
-        <span class="text-[10px] sm:text-[11px] font-medium leading-tight">แก้มลิง (16)</span>
+      <button onclick="switchTab('basins')" id="dock-basins" class="dock-btn flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition text-slate-400 hover:text-slate-200">
+        <span class="text-lg">🏞️</span>
+        <span>เขื่อน & แก้มลิง</span>
       </button>
-
-      <!-- Dock Item 5: Hotspots -->
-      <button onclick="switchTab('hotspots')" id="dock-hotspots" class="dock-btn flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl transition text-slate-400 hover:text-slate-200">
-        <span class="text-base sm:text-lg">⚠️</span>
-        <span class="text-[10px] sm:text-[11px] font-medium leading-tight">จุดเสี่ยง (22)</span>
+      <button onclick="switchTab('hotspots')" id="dock-hotspots" class="dock-btn flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition text-slate-400 hover:text-slate-200">
+        <span class="text-lg">⚠️</span>
+        <span>จุดเสี่ยง</span>
       </button>
-
-      <!-- Dock Item 6: Citizen Reports -->
-      <button onclick="switchTab('reports')" id="dock-reports" class="dock-btn flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl transition text-slate-400 hover:text-slate-200">
-        <span class="text-base sm:text-lg">📸</span>
-        <span class="text-[10px] sm:text-[11px] font-medium leading-tight">แจ้งเหตุสด</span>
+      <button onclick="switchTab('reports')" id="dock-reports" class="dock-btn flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition text-slate-400 hover:text-slate-200">
+        <span class="text-lg">📸</span>
+        <span>แจ้งเหตุ <span id="report-count-badge" class="text-[9px] text-cyan-400"></span></span>
       </button>
-
     </div>
   </footer>
 
-  <!-- ==========================================
-       MODAL: REPORT INCIDENT FORM (แจ้งเหตุน้ำท่วม)
-  =========================================== -->
-  <div id="modal-report" class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 hidden">
-    <div class="glass-panel w-full max-w-lg rounded-2xl p-5 border border-slate-700 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. REPORT INCIDENT MODAL -->
+  <div id="modal-report" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+    <div class="glass-panel w-full max-w-lg rounded-2xl p-5 border border-cyan-800 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
         <div class="flex items-center gap-2">
-          <span class="text-xl">📸</span>
-          <h3 class="text-base font-bold text-white">แจ้งเหตุน้ำท่วม / รายงานระดับน้ำ</h3>
+          <span class="text-lg">📸</span>
+          <h3 class="font-bold text-white text-sm sm:text-base">แจ้งเหตุน้ำท่วม / รายงานระดับน้ำ</h3>
         </div>
-        <button onclick="closeReportModal()" class="text-slate-400 hover:text-white text-lg p-1">✕</button>
+        <button onclick="closeReportModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
       </div>
 
-      <form id="form-report" onsubmit="handleReportSubmit(event)" class="space-y-4 text-xs">
+      <form id="form-report" onsubmit="handleReportSubmit(event)" class="space-y-3 text-xs">
         <div>
-          <label class="block text-slate-300 font-semibold mb-1">จุดเกิดเหตุ / ชื่อถนน / ซอย <span class="text-rose-400">*</span></label>
-          <input type="text" id="rep-name" required placeholder="เช่น ถนนฉลองกรุง หน้าสถาบัน KMITL" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 text-xs">
+          <label class="block text-slate-300 mb-1 font-medium">ชื่อสถานที่ / ถนน / บริเวณที่เกิดเหตุ *</label>
+          <input type="text" id="rep-name" required placeholder="เช่น ถ.พหลโยธิน หน้าโลตัส หรือ อ.วารินชำราบ จ.อุบลฯ" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block text-slate-300 font-semibold mb-1">ระดับความสูงของน้ำ (ซม.) <span class="text-rose-400">*</span></label>
-            <input type="number" id="rep-depth" required min="1" max="150" value="10" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-500 text-xs font-mono">
+            <label class="block text-slate-300 mb-1 font-medium">จังหวัด / ภูมิภาค *</label>
+            <input type="text" id="rep-province" required placeholder="เช่น กรุงเทพฯ, เชียงใหม่" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
           </div>
           <div>
-            <label class="block text-slate-300 font-semibold mb-1">สภาพน้ำท่วม</label>
-            <select id="rep-level" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-500 text-xs">
-              <option value="น้ำรอระบายข้อเท้า">น้ำรอระบายผิวทาง (5-10 ซม.)</option>
-              <option value="เสมอทางเท้า/ครึ่งล้อ">เสมอทางเท้า / ครึ่งล้อรถ (10-20 ซม.)</option>
-              <option value="มิดล้อรถเก๋ง (วิกฤต)">มิดล้อรถเก๋ง / วิกฤต (>20 ซม.)</option>
-            </select>
+            <label class="block text-slate-300 mb-1 font-medium">ระดับน้ำท่วมขัง (ซม.)</label>
+            <input type="number" id="rep-depth" min="0" max="250" value="15" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-400">
           </div>
         </div>
 
-        <div>
-          <label class="block text-slate-300 font-semibold mb-1">เขตพื้นที่ กทม.</label>
-          <select id="rep-district" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-500 text-xs">
-            <option value="ลาดกระบัง">เขตลาดกระบัง</option>
-            <option value="จตุจักร">เขตจตุจักร</option>
-            <option value="วัฒนา">เขตวัฒนา</option>
-            <option value="บางกะปิ">เขตบางกะปิ</option>
-            <option value="ประเวศ">เขตประเวศ</option>
-            <option value="ห้วยขวาง">เขตห้วยขวาง</option>
-            <option value="ดอนเมือง">เขตดอนเมือง</option>
-            <option value="บางนา">เขตบางนา</option>
-            <option value="อื่นๆ">เขตอื่นๆ</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-slate-300 font-semibold mb-1">รูปถ่ายสถานการณ์จริง</label>
-          <input type="file" id="rep-file" accept="image/*" class="w-full text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-cyan-300 hover:file:bg-slate-700 cursor-pointer">
-          <div id="file-preview-wrap" class="hidden mt-2 border border-slate-700 rounded-xl overflow-hidden max-h-36">
-            <img id="file-preview" src="" alt="พรีวิวรูปถ่าย" class="w-full object-cover">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">ละติจูด (Lat)</label>
+            <input type="number" step="any" id="rep-lat" value="13.7563" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono focus:outline-none focus:border-cyan-400">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">ลองจิจูด (Lng)</label>
+            <input type="number" step="any" id="rep-lng" value="100.5018" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono focus:outline-none focus:border-cyan-400">
           </div>
         </div>
+        <button type="button" onclick="getCurrentLocation()" class="text-cyan-400 hover:underline flex items-center gap-1 text-[11px]">
+          <span>📍</span> ดึงพิกัด GPS ปัจจุบันของฉัน
+        </button>
 
         <div>
-          <label class="block text-slate-300 font-semibold mb-1">รายละเอียดเพิ่มเติม / สภาพจราจร</label>
-          <textarea id="rep-note" rows="2" placeholder="ระบุเลนที่มีน้ำขัง หรือทางเลี่ยงที่แนะนำ..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 text-xs"></textarea>
+          <label class="block text-slate-300 mb-1 font-medium">สภาพการจราจร / ผลกระทบ</label>
+          <input type="text" id="rep-traffic" placeholder="เช่น รถเล็กห้ามผ่าน, น้ำขัง 1 ช่องจราจร" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
         </div>
 
-        <div>
-          <label class="block text-slate-300 font-semibold mb-1">ชื่อผู้แจ้งเหตุ</label>
-          <input type="text" id="rep-reporter" placeholder="เช่น ประชาชน / นักศึกษา สจล." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 text-xs">
-        </div>
-
-        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-800">
-          <button type="button" onclick="closeReportModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition">
-            ยกเลิก
-          </button>
-          <button type="submit" id="btn-submit-rep" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-lg shadow-cyan-600/30">
-            <span>🚀</span> บันทึกและเผยแพร่
+        <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+          <button type="button" onclick="closeReportModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300">ยกเลิก</button>
+          <button type="submit" id="btn-submit-rep" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold shadow-lg shadow-cyan-600/30">
+            บันทึกและเผยแพร่
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ==========================================
-       MODAL: EMERGENCY SOS HOTLINE
-  =========================================== -->
-  <div id="modal-sos" class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 hidden">
-    <div class="glass-panel w-full max-w-md rounded-2xl p-5 border border-rose-800/80 shadow-2xl relative">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+  <!-- 2. SOS EMERGENCY MODAL -->
+  <div id="modal-sos" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+    <div class="glass-panel w-full max-w-md rounded-2xl p-5 border border-rose-800 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
         <div class="flex items-center gap-2">
-          <span class="text-2xl">🚨</span>
-          <h3 class="text-base font-bold text-white">สายด่วนช่วยเหลือเหตุน้ำท่วม 24 ชม.</h3>
+          <span class="text-xl">🚨</span>
+          <h3 class="font-bold text-white text-sm sm:text-base">สายด่วนช่วยเหลือเหตุน้ำท่วม 24 ชม.</h3>
         </div>
-        <button onclick="closeSosModal()" class="text-slate-400 hover:text-white text-lg p-1">✕</button>
+        <button onclick="closeSosModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
       </div>
 
-      <div class="space-y-2.5 text-xs">
-        <a href="tel:1555" class="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-cyan-500 transition">
+      <div class="space-y-2 text-xs">
+        <a href="tel:1784" class="p-3 rounded-xl bg-rose-950/60 border border-rose-700/80 hover:bg-rose-900/80 flex items-center justify-between text-white transition block">
           <div>
-            <p class="font-bold text-white text-sm">ศูนย์รับแจ้งน้ำท่วม กทม.</p>
-            <p class="text-slate-400 text-[11px]">สำนักการระบายน้ำ กรุงเทพมหานคร</p>
+            <div class="font-bold text-rose-300">สายด่วนนิรภัย (ปภ. กรมป้องกันฯ) — ทั่วประเทศ</div>
+            <div class="text-[10px] text-slate-300">รับแจ้งเหตุน้ำท่วม ดินถล่ม ช่วยเหลือฉุกเฉิน 24 ชม.</div>
           </div>
-          <span class="px-3 py-1.5 rounded-lg bg-cyan-900/80 text-cyan-300 font-mono font-bold text-sm border border-cyan-700">1555</span>
+          <span class="text-base font-bold font-mono text-rose-400">1784</span>
         </a>
 
-        <a href="tel:1784" class="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-amber-500 transition">
+        <a href="tel:1555" class="p-3 rounded-xl bg-cyan-950/60 border border-cyan-700/80 hover:bg-cyan-900/80 flex items-center justify-between text-white transition block">
           <div>
-            <p class="font-bold text-white text-sm">กรมป้องกันและบรรเทาสาธารณภัย (ปภ.)</p>
-            <p class="text-slate-400 text-[11px]">สายด่วนสาธารณภัยแห่งชาติ แจ้งเหตุฉุกเฉิน</p>
+            <div class="font-bold text-cyan-300">ศูนย์รับเรื่องราวร้องทุกข์ กทม.</div>
+            <div class="text-[10px] text-slate-300">น้ำท่วมขัง ท่อระบายน้ำอุดตัน ต้นไม้ล้ม</div>
           </div>
-          <span class="px-3 py-1.5 rounded-lg bg-amber-900/80 text-amber-300 font-mono font-bold text-sm border border-amber-700">1784</span>
+          <span class="text-base font-bold font-mono text-cyan-400">1555</span>
         </a>
 
-        <a href="tel:199" class="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-rose-500 transition">
+        <a href="tel:199" class="p-3 rounded-xl bg-slate-900 border border-slate-700 hover:bg-slate-800 flex items-center justify-between text-white transition block">
           <div>
-            <p class="font-bold text-white text-sm">ศูนย์วิทยุพระราม 199</p>
-            <p class="text-slate-400 text-[11px]">หน่วยดับเพลิงและกู้ภัย กทม.</p>
+            <div class="font-bold">กู้ภัยและระงับอัคคีภัย / อพยพฉุกเฉิน</div>
+            <div class="text-[10px] text-slate-400">หน่วยดับเพลิงและกู้ภัยสถานการณ์วิกฤต</div>
           </div>
-          <span class="px-3 py-1.5 rounded-lg bg-rose-900/80 text-rose-300 font-mono font-bold text-sm border border-rose-700">199</span>
+          <span class="text-base font-bold font-mono text-slate-300">199</span>
         </a>
 
-        <a href="tel:1197" class="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-blue-500 transition">
+        <a href="tel:1197" class="p-3 rounded-xl bg-slate-900 border border-slate-700 hover:bg-slate-800 flex items-center justify-between text-white transition block">
           <div>
-            <p class="font-bold text-white text-sm">ตำรวจจราจร (บก.จร.)</p>
-            <p class="text-slate-400 text-[11px]">สอบถามเส้นทางน้ำท่วมและรถติด</p>
+            <div class="font-bold">ศูนย์ควบคุมและสั่งการจราจร (บก.02)</div>
+            <div class="text-[10px] text-slate-400">สอบถามเส้นทางน้ำท่วมและรถติด</div>
           </div>
-          <span class="px-3 py-1.5 rounded-lg bg-blue-900/80 text-blue-300 font-mono font-bold text-sm border border-blue-700">1197</span>
+          <span class="text-base font-bold font-mono text-slate-300">1197</span>
         </a>
 
-        <a href="tel:023298111" class="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-orange-500 transition">
+        <a href="tel:1193" class="p-3 rounded-xl bg-slate-900 border border-slate-700 hover:bg-slate-800 flex items-center justify-between text-white transition block">
           <div>
-            <p class="font-bold text-white text-sm">ศูนย์รักษาความปลอดภัย สจล. (KMITL)</p>
-            <p class="text-slate-400 text-[11px]">เหตุฉุกเฉินพื้นที่ลาดกระบัง และรอบสถาบัน</p>
+            <div class="font-bold">ตำรวจทางหลวง — ทั่วประเทศ</div>
+            <div class="text-[10px] text-slate-400">สอบถามเส้นทางทางหลวงที่ถูกน้ำท่วมสัญจรไม่ได้</div>
           </div>
-          <span class="px-3 py-1.5 rounded-lg bg-orange-900/80 text-orange-300 font-mono font-bold text-xs border border-orange-700">02-329-8111</span>
+          <span class="text-base font-bold font-mono text-slate-300">1193</span>
         </a>
       </div>
 
-      <div class="mt-4 pt-3 border-t border-slate-800 text-center">
-        <button onclick="closeSosModal()" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition">
+      <div class="text-center pt-2">
+        <button onclick="closeSosModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs">
           ปิดหน้าต่าง
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ==========================================
-       MODAL: PHOTO LIGHTBOX
-  =========================================== -->
-  <div id="modal-photo" class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 hidden" onclick="closePhotoModal()">
-    <div class="relative max-w-3xl max-h-[85vh] rounded-2xl overflow-hidden glass-panel border border-slate-700 p-2 shadow-2xl" onclick="event.stopPropagation()">
-      <button onclick="closePhotoModal()" class="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-slate-900/80 text-white flex items-center justify-center hover:bg-rose-600 transition font-bold">
-        ✕
-      </button>
-      <img id="modal-photo-img" src="" alt="ภาพถ่ายขยาย" class="max-w-full max-h-[70vh] rounded-xl object-contain mx-auto">
-      <div class="p-3 text-xs text-slate-300 flex items-center justify-between">
-        <span id="modal-photo-caption" class="font-semibold text-white"></span>
-        <span id="modal-photo-meta" class="font-mono text-cyan-400"></span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==========================================
-       APPLICATION CORE JAVASCRIPT
-  =========================================== -->
+  <!-- ================= SCRIPTS ================= -->
   <script>
-    // ── DATASETS ──
-    const RETENTION_BASINS = [
-      { id: 'b01', name: 'แก้มลิงบึงหนองบอน', district: 'ประเวศ', lat: 13.6895, lng: 100.6625, capacityM3: 5000000, currentM3: 3200000, maxMsl: 2.50, currentMsl: 1.60, drainRateM3s: 25 },
-      { id: 'b02', name: 'แก้มลิงคลองมหาชัย-สนามชัย', district: 'บางขุนเทียน', lat: 13.5950, lng: 100.4120, capacityM3: 6000000, currentM3: 4100000, maxMsl: 2.20, currentMsl: 1.45, drainRateM3s: 40 },
-      { id: 'b03', name: 'แก้มลิงบึงพระราม 9', district: 'ห้วยขวาง', lat: 13.7540, lng: 100.5890, capacityM3: 350000, currentM3: 180000, maxMsl: 1.80, currentMsl: 0.95, drainRateM3s: 12 },
-      { id: 'b04', name: 'แก้มลิงบึงมักกะสัน', district: 'ราชเทวี', lat: 13.7525, lng: 100.5510, capacityM3: 250000, currentM3: 140000, maxMsl: 1.50, currentMsl: 0.85, drainRateM3s: 10 },
-      { id: 'b05', name: 'แก้มลิงสวนเบญจกิติ', district: 'คลองเตย', lat: 13.7305, lng: 100.5585, capacityM3: 128000, currentM3: 62000, maxMsl: 1.20, currentMsl: 0.55, drainRateM3s: 6 },
-      { id: 'b06', name: 'แก้มลิงสวนลุมพินี', district: 'ปทุมวัน', lat: 13.7314, lng: 100.5414, capacityM3: 120000, currentM3: 55000, maxMsl: 1.20, currentMsl: 0.50, drainRateM3s: 5 },
-      { id: 'b07', name: 'แก้มลิงบึงเสรีไทย', district: 'บึงกุ่ม', lat: 13.7820, lng: 100.6790, capacityM3: 1000000, currentM3: 620000, maxMsl: 2.00, currentMsl: 1.25, drainRateM3s: 15 },
-      { id: 'b08', name: 'แก้มลิงคลองบางซื่อ', district: 'พญาไท/จตุจักร', lat: 13.8050, lng: 100.5480, capacityM3: 400000, currentM3: 260000, maxMsl: 1.90, currentMsl: 1.30, drainRateM3s: 14 },
-      { id: 'b09', name: 'แก้มลิงบึงลาดพร้าว', district: 'ลาดพร้าว', lat: 13.8110, lng: 100.6050, capacityM3: 380000, currentM3: 240000, maxMsl: 1.85, currentMsl: 1.20, drainRateM3s: 12 },
-      { id: 'b10', name: 'แก้มลิงคลองทวีวัฒนา', district: 'ทวีวัฒนา', lat: 13.7850, lng: 100.3550, capacityM3: 1200000, currentM3: 750000, maxMsl: 2.40, currentMsl: 1.50, drainRateM3s: 20 },
-      { id: 'b11', name: 'แก้มลิงคลองบางเขน', district: 'บางเขน', lat: 13.8450, lng: 100.5750, capacityM3: 450000, currentM3: 290000, maxMsl: 2.00, currentMsl: 1.35, drainRateM3s: 16 },
-      { id: 'b12', name: 'แก้มลิงคลองเปรมประชากร', district: 'ดอนเมือง', lat: 13.9120, lng: 100.5980, capacityM3: 500000, currentM3: 330000, maxMsl: 2.10, currentMsl: 1.40, drainRateM3s: 18 },
-      { id: 'b13', name: 'แก้มลิงคลองพระยาสุเรนทร์', district: 'คลองสามวา', lat: 13.8650, lng: 100.7020, capacityM3: 800000, currentM3: 510000, maxMsl: 2.20, currentMsl: 1.45, drainRateM3s: 15 },
-      { id: 'b14', name: 'แก้มลิงบึงกระเทียม', district: 'มีนบุรี', lat: 13.8150, lng: 100.7300, capacityM3: 350000, currentM3: 210000, maxMsl: 1.90, currentMsl: 1.15, drainRateM3s: 10 },
-      { id: 'b15', name: 'แก้มลิงหนองจอก', district: 'หนองจอก', lat: 13.8550, lng: 100.8600, capacityM3: 1500000, currentM3: 890000, maxMsl: 2.50, currentMsl: 1.55, drainRateM3s: 22 },
-      { id: 'b16', name: 'แก้มลิงคลองประเวศฯ / สจล.', district: 'ลาดกระบัง', lat: 13.7280, lng: 100.7780, capacityM3: 950000, currentM3: 590000, maxMsl: 2.30, currentMsl: 1.40, drainRateM3s: 18 }
+    // ── DATASETS (NATIONAL DAMS 25 + BKK BASINS 16 = 41) ──
+    const DAMS_AND_BASINS = [
+      // 1. National Dams (ทั่วประเทศ)
+      { id: 'd01', name: 'เขื่อนภูมิพล', en: 'Bhumibol Dam', province: 'ตาก', region: 'north', type: 'dam', lat: 17.2439, lng: 98.9733, capacityM3: 13462, currentM3: 10420, outflowRate: 25, status: 'ปกติ' },
+      { id: 'd02', name: 'เขื่อนสิริกิติ์', en: 'Sirikit Dam', province: 'อุตรดิตถ์', region: 'north', type: 'dam', lat: 17.7667, lng: 100.5667, capacityM3: 9510, currentM3: 7950, outflowRate: 20, status: 'ปกติ' },
+      { id: 'd03', name: 'เขื่อนแควน้อยบำรุงแดน', en: 'Khwae Noi Dam', province: 'พิษณุโลก', region: 'north', type: 'dam', lat: 17.1833, lng: 100.4167, capacityM3: 939, currentM3: 820, outflowRate: 15, status: 'เฝ้าระวัง' },
+      { id: 'd04', name: 'เขื่อนกิ่วลม', en: 'Kiew Lom Dam', province: 'ลำปาง', region: 'north', type: 'dam', lat: 18.5167, lng: 99.6167, capacityM3: 106, currentM3: 88, outflowRate: 8, status: 'ปกติ' },
+      { id: 'd05', name: 'เขื่อนกิ่วคอหมา', en: 'Kiew Kho Ma Dam', province: 'ลำปาง', region: 'north', type: 'dam', lat: 18.7333, lng: 99.6333, capacityM3: 170, currentM3: 152, outflowRate: 12, status: 'เฝ้าระวัง' },
+      { id: 'd06', name: 'เขื่อนแม่มอก', en: 'Mae Mok Dam', province: 'สุโขทัย', region: 'north', type: 'dam', lat: 17.2667, lng: 99.4333, capacityM3: 110, currentM3: 95, outflowRate: 5, status: 'ปกติ' },
+      
+      { id: 'd07', name: 'เขื่อนป่าสักชลสิทธิ์', en: 'Pa Sak Jolasid Dam', province: 'ลพบุรี', region: 'central', type: 'dam', lat: 14.8631, lng: 101.1242, capacityM3: 960, currentM3: 840, outflowRate: 45, status: 'เฝ้าระวัง' },
+      { id: 'd08', name: 'เขื่อนศรีนครินทร์', en: 'Srinagarind Dam', province: 'กาญจนบุรี', region: 'central', type: 'dam', lat: 14.4042, lng: 99.1281, capacityM3: 17745, currentM3: 14900, outflowRate: 18, status: 'ปกติ' },
+      { id: 'd09', name: 'เขื่อนวชิราลงกรณ', en: 'Vajiralongkorn Dam', province: 'กาญจนบุรี', region: 'central', type: 'dam', lat: 14.7986, lng: 98.5986, capacityM3: 8860, currentM3: 6980, outflowRate: 14, status: 'ปกติ' },
+      { id: 'd10', name: 'เขื่อนขุนด่านปราการชล', en: 'Khun Dan Prakan Chon Dam', province: 'นครนายก', region: 'central', type: 'dam', lat: 14.3142, lng: 101.3217, capacityM3: 224, currentM3: 215, outflowRate: 18, status: 'เฝ้าระวัง' },
+      { id: 'd11', name: 'เขื่อนทับเสลา', en: 'Thap Salao Dam', province: 'อุทัยธานี', region: 'central', type: 'dam', lat: 15.1500, lng: 99.3500, capacityM3: 160, currentM3: 125, outflowRate: 6, status: 'ปกติ' },
+      { id: 'd12', name: 'เขื่อนกระเสียว', en: 'Krasiao Dam', province: 'สุพรรณบุรี', region: 'central', type: 'dam', lat: 14.8333, lng: 99.6667, capacityM3: 240, currentM3: 198, outflowRate: 10, status: 'ปกติ' },
+
+      { id: 'd13', name: 'เขื่อนอุบลรัตน์', en: 'Ubol Ratana Dam', province: 'ขอนแก่น', region: 'isan', type: 'dam', lat: 16.7725, lng: 102.6231, capacityM3: 2431, currentM3: 2050, outflowRate: 35, status: 'เฝ้าระวัง' },
+      { id: 'd14', name: 'เขื่อนลำปาว', en: 'Lam Pao Dam', province: 'กาฬสินธุ์', region: 'isan', type: 'dam', lat: 16.5947, lng: 103.4478, capacityM3: 1980, currentM3: 1680, outflowRate: 28, status: 'ปกติ' },
+      { id: 'd15', name: 'เขื่อนสิรินธร', en: 'Sirindhorn Dam', province: 'อุบลราชธานี', region: 'isan', type: 'dam', lat: 15.2008, lng: 105.4267, capacityM3: 1966, currentM3: 1590, outflowRate: 22, status: 'ปกติ' },
+      { id: 'd16', name: 'เขื่อนจุฬาภรณ์', en: 'Chulabhorn Dam', province: 'ชัยภูมิ', region: 'isan', type: 'dam', lat: 16.5333, lng: 101.6500, capacityM3: 164, currentM3: 142, outflowRate: 8, status: 'ปกติ' },
+      { id: 'd17', name: 'เขื่อนห้วยหลวง', en: 'Huai Luang Dam', province: 'อุดรธานี', region: 'isan', type: 'dam', lat: 17.3167, lng: 102.6833, capacityM3: 118, currentM3: 102, outflowRate: 6, status: 'ปกติ' },
+      { id: 'd18', name: 'เขื่อนน้ำพุง', en: 'Nam Phung Dam', province: 'สกลนคร', region: 'isan', type: 'dam', lat: 16.9833, lng: 103.9833, capacityM3: 165, currentM3: 138, outflowRate: 7, status: 'ปกติ' },
+      { id: 'd19', name: 'เขื่อนลำตะคอง', en: 'Lam Takhong Dam', province: 'นครราชสีมา', region: 'isan', type: 'dam', lat: 14.8667, lng: 101.5667, capacityM3: 314, currentM3: 255, outflowRate: 10, status: 'ปกติ' },
+      { id: 'd20', name: 'เขื่อนลำพระเพลิง', en: 'Lam Phra Phloeng Dam', province: 'นครราชสีมา', region: 'isan', type: 'dam', lat: 14.5833, lng: 101.8333, capacityM3: 155, currentM3: 130, outflowRate: 8, status: 'ปกติ' },
+
+      { id: 'd21', name: 'เขื่อนรัชชประภา', en: 'Rajjaprabha Dam (Cheow Lan)', province: 'สุราษฎร์ธานี', region: 'south', type: 'dam', lat: 8.9714, lng: 98.8167, capacityM3: 5639, currentM3: 4520, outflowRate: 16, status: 'ปกติ' },
+      { id: 'd22', name: 'เขื่อนบางลาง', en: 'Bang Lang Dam', province: 'ยะลา', region: 'south', type: 'dam', lat: 6.1558, lng: 101.2725, capacityM3: 1454, currentM3: 1180, outflowRate: 12, status: 'ปกติ' },
+      { id: 'd23', name: 'เขื่อนแก่งกระจาน', en: 'Kaeng Krachan Dam', province: 'เพชรบุรี', region: 'south', type: 'dam', lat: 12.9167, lng: 99.6333, capacityM3: 710, currentM3: 615, outflowRate: 15, status: 'เฝ้าระวัง' },
+      { id: 'd24', name: 'เขื่อนปราณบุรี', en: 'Pranburi Dam', province: 'ประจวบคีรีขันธ์', region: 'south', type: 'dam', lat: 12.3833, lng: 99.8167, capacityM3: 391, currentM3: 310, outflowRate: 10, status: 'ปกติ' },
+
+      { id: 'd25', name: 'เขื่อนคลองสียัด', en: 'Khlong Si Yat Dam', province: 'ฉะเชิงเทรา', region: 'east', type: 'dam', lat: 13.4167, lng: 101.6500, capacityM3: 420, currentM3: 345, outflowRate: 12, status: 'ปกติ' },
+
+      // 2. BKK Retention Basins (แก้มลิง กทม. 16 แห่ง)
+      { id: 'b01', name: 'แก้มลิงบึงหนองบอน', en: 'Nong Bon Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.6885, lng: 100.6552, capacityM3: 5.0, currentM3: 3.2, outflowRate: 15, status: 'พร้อมรับน้ำ' },
+      { id: 'b02', name: 'แก้มลิงบึงมักกะสัน', en: 'Makkasan Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.7538, lng: 100.5512, capacityM3: 0.25, currentM3: 0.18, outflowRate: 8, status: 'พร้อมรับน้ำ' },
+      { id: 'b03', name: 'แก้มลิงบึงพระราม 9', en: 'Rama IX Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.7651, lng: 100.5910, capacityM3: 0.35, currentM3: 0.22, outflowRate: 10, status: 'พร้อมรับน้ำ' },
+      { id: 'b04', name: 'แก้มลิงคลองมหาชัย-คลองสนามชัย', en: 'Mahachai-Sanamchai', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.6120, lng: 100.4150, capacityM3: 6.0, currentM3: 3.9, outflowRate: 20, status: 'พร้อมรับน้ำ' },
+      { id: 'b05', name: 'แก้มลิงสวนหลวง ร.9', en: 'Suan Luang Rama IX', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.6930, lng: 100.6650, capacityM3: 1.2, currentM3: 0.75, outflowRate: 5, status: 'พร้อมรับน้ำ' },
+      { id: 'b06', name: 'แก้มลิงบึงเสรีไทย', en: 'Seri Thai Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.7845, lng: 100.6812, capacityM3: 0.95, currentM3: 0.62, outflowRate: 4, status: 'พร้อมรับน้ำ' },
+      { id: 'b07', name: 'แก้มลิงบึงพญาไท', en: 'Phaya Thai Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.7701, lng: 100.5345, capacityM3: 0.12, currentM3: 0.08, outflowRate: 3, status: 'พร้อมรับน้ำ' },
+      { id: 'b08', name: 'แก้มลิงคลองหลุมไผ่', en: 'Khlong Lumphai Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.8420, lng: 100.6120, capacityM3: 0.40, currentM3: 0.29, outflowRate: 6, status: 'เฝ้าระวัง' },
+      { id: 'b09', name: 'แก้มลิงคลองอ้อส่วน', en: 'Khlong Or Suan Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.8210, lng: 100.6350, capacityM3: 0.28, currentM3: 0.19, outflowRate: 4, status: 'พร้อมรับน้ำ' },
+      { id: 'b10', name: 'แก้มลิงสวนเบญจกิติ', en: 'Benchakitti Forest Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.7295, lng: 100.5580, capacityM3: 0.30, currentM3: 0.16, outflowRate: 5, status: 'พร้อมรับน้ำ' },
+      { id: 'b11', name: 'แก้มลิงคลองบางซื่อ', en: 'Bang Sue Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.8050, lng: 100.5210, capacityM3: 0.50, currentM3: 0.36, outflowRate: 12, status: 'พร้อมรับน้ำ' },
+      { id: 'b12', name: 'แก้มลิงบึงตาโต้', en: 'Ta To Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.8820, lng: 100.8250, capacityM3: 0.70, currentM3: 0.44, outflowRate: 4, status: 'พร้อมรับน้ำ' },
+      { id: 'b13', name: 'แก้มลิงคลองประเวศบุรีรมย์', en: 'Prawet Burirom Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.7150, lng: 100.7100, capacityM3: 2.5, currentM3: 1.65, outflowRate: 14, status: 'พร้อมรับน้ำ' },
+      { id: 'b14', name: 'แก้มลิงบึงบัว', en: 'Bueng Bua Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.7650, lng: 100.7600, capacityM3: 0.85, currentM3: 0.58, outflowRate: 6, status: 'พร้อมรับน้ำ' },
+      { id: 'b15', name: 'แก้มลิงคลองบางมด', en: 'Bang Mod Basin', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.6550, lng: 100.4650, capacityM3: 1.1, currentM3: 0.72, outflowRate: 7, status: 'พร้อมรับน้ำ' },
+      { id: 'b16', name: 'แก้มลิงคู้ขวา-คู้ซ้าย', en: 'Khu Khwa - Khu Sai', province: 'กรุงเทพฯ', region: 'bkk', type: 'basin', lat: 13.8650, lng: 100.8550, capacityM3: 3.2, currentM3: 2.15, outflowRate: 12, status: 'พร้อมรับน้ำ' }
     ];
 
+    // ── NATIONWIDE & BKK FLOOD HOTSPOTS (36 POINTS) ──
     const FLOOD_HOTSPOTS = [
-      { id: 'h01', name: 'แยกรัชดาภิเษก-ลาดพร้าว', district: 'จตุจักร', lat: 13.8055, lng: 100.5742, depthCm: 10, status: 'warning', traffic: 'ชะลอตัว เลนซ้ายมีน้ำขัง', pumpCount: 4 },
-      { id: 'h02', name: 'หน้าเซ็นทรัลลาดพร้าว (ถ.พหลโยธิน)', district: 'จตุจักร', lat: 13.8165, lng: 100.5612, depthCm: 15, status: 'critical', traffic: 'เสมอทางเท้า รถเล็กชิดขวา', pumpCount: 6 },
-      { id: 'h03', name: 'ซอยสุขุมวิท 71 (ปรีดี พนมยงค์)', district: 'วัฒนา', lat: 13.7195, lng: 100.5925, depthCm: 22, status: 'critical', traffic: 'น้ำท่วมสูง รถเล็กควรเลี่ยง', pumpCount: 5 },
-      { id: 'h04', name: 'ซอยสุขุมวิท 22, 24', district: 'คลองเตย', lat: 13.7290, lng: 100.5650, depthCm: 12, status: 'warning', traffic: 'น้ำรอระบายช่วงกลางซอย', pumpCount: 3 },
-      { id: 'h05', name: 'ซอยสุขุมวิท 39 (พร้อมพงษ์)', district: 'วัฒนา', lat: 13.7380, lng: 100.5720, depthCm: 14, status: 'warning', traffic: 'น้ำขังช่วงทางโค้งโรงเรียน', pumpCount: 3 },
-      { id: 'h06', name: 'แยกลำสาลี (ถ.รามคำแหง)', district: 'บางกะปิ', lat: 13.7645, lng: 100.6485, depthCm: 12, status: 'warning', traffic: 'แนวก่อสร้างรถไฟฟ้ามีน้ำขัง', pumpCount: 4 },
-      { id: 'h07', name: 'ถ.ฉลองกรุง หน้าพระจอมเกล้าลาดกระบัง (KMITL)', district: 'ลาดกระบัง', lat: 13.7298, lng: 100.7765, depthCm: 8, status: 'warning', traffic: 'น้ำรอระบายเลนซ้ายสุด ผ่านได้', pumpCount: 5 },
-      { id: 'h08', name: 'วงเวียนบางเขน (หลักสี่-รามอินทรา)', district: 'บางเขน', lat: 13.8745, lng: 100.5975, depthCm: 18, status: 'critical', traffic: 'ท่วมผิวทางวงเวียน', pumpCount: 4 },
-      { id: 'h09', name: 'ถ.ศรีนครินทร์ (วัดศรีเอี่ยม-ลาซาล)', district: 'บางนา', lat: 13.6680, lng: 100.6470, depthCm: 16, status: 'critical', traffic: 'มีน้ำขังใต้สะพานข้ามแยก', pumpCount: 6 },
-      { id: 'h10', name: 'ถ.พัฒนาการ (แยกคลองตัน)', district: 'สวนหลวง', lat: 13.7410, lng: 100.6010, depthCm: 10, status: 'warning', traffic: 'ชะลอตัวช่วงลงสะพาน', pumpCount: 3 },
-      { id: 'h11', name: 'ถ.ประชาอุทิศ (ห้วยขวาง-เหม่งจ๋าย)', district: 'ห้วยขวาง', lat: 13.7780, lng: 100.5820, depthCm: 8, status: 'normal', traffic: 'ผิวทางแห้ง เครื่องสูบพร้อม', pumpCount: 2 },
-      { id: 'h12', name: 'ถ.นวมินทร์ (แยกโพธิ์แก้ว)', district: 'บึงกุ่ม', lat: 13.8020, lng: 100.6540, depthCm: 14, status: 'warning', traffic: 'น้ำขังหน้าหมู่บ้าน 1 เลน', pumpCount: 4 },
-      { id: 'h13', name: 'ถ.เพชรเกษม (คลองบางหว้า)', district: 'ภาษีเจริญ', lat: 13.7180, lng: 100.4570, depthCm: 10, status: 'warning', traffic: 'น้ำรอระบายเลนซ้ายสุด', pumpCount: 3 },
-      { id: 'h14', name: 'ถ.จรัญสนิทวงศ์ (แยกบางพลัด)', district: 'บางพลัด', lat: 13.7850, lng: 100.4950, depthCm: 12, status: 'warning', traffic: 'ชะลอตัวแนวก่อสร้าง', pumpCount: 3 },
-      { id: 'h15', name: 'ถ.เอกชัย (แยกบางบอน)', district: 'บางบอน', lat: 13.6650, lng: 100.4200, depthCm: 15, status: 'critical', traffic: 'ท่วมเสมอทางเท้าช่วงตลาด', pumpCount: 4 },
-      { id: 'h16', name: 'ถ.วิภาวดีรังสิต (แยกสุทธิสาร)', district: 'พญาไท', lat: 13.7880, lng: 100.5600, depthCm: 10, status: 'warning', traffic: 'ทางขนานมีน้ำขังเล็กน้อย', pumpCount: 4 },
-      { id: 'h17', name: 'ถ.งามวงศ์วาน (แยกพงษ์เพชร)', district: 'จตุจักร', lat: 13.8560, lng: 100.5430, depthCm: 16, status: 'critical', traffic: 'หน้าตลาดพงษ์เพชรท่วมขัง', pumpCount: 5 },
-      { id: 'h18', name: 'ซอยงามวงศ์วาน 47 (ชินเขต)', district: 'หลักสี่', lat: 13.8520, lng: 100.5510, depthCm: 18, status: 'critical', traffic: 'ท่วมตลอดแนวซอย', pumpCount: 3 },
-      { id: 'h19', name: 'ถ.เสนานิคม 1 (ลาดพร้าว-วังหิน)', district: 'ลาดพร้าว', lat: 13.8290, lng: 100.5900, depthCm: 14, status: 'warning', traffic: 'รถเล็กผ่านได้ชะลอตัว', pumpCount: 3 },
-      { id: 'h20', name: 'ถ.สรงประภา (ดอนเมือง)', district: 'ดอนเมือง', lat: 13.9210, lng: 100.5900, depthCm: 12, status: 'warning', traffic: 'ช่วงหน้าวัดดอนเมือง', pumpCount: 4 },
-      { id: 'h21', name: 'ถ.สุวินทวงศ์ (มีนบุรี-หนองจอก)', district: 'หนองจอก', lat: 13.8400, lng: 100.7850, depthCm: 10, status: 'warning', traffic: 'ช่วงสะพานข้ามคลอง', pumpCount: 3 },
-      { id: 'h22', name: 'ถ.บางนา-ตราด (กม.4 ใต้ทางด่วน)', district: 'บางนา', lat: 13.6640, lng: 100.6380, depthCm: 16, status: 'critical', traffic: 'ทางคู่ขนานท่วมขัง', pumpCount: 5 }
+      // Upcountry hotspots (ต่างจังหวัด)
+      { id: 'hu01', name: 'สะพานมิตรภาพแม่สายแห่งที่ 1 (ริมแม่น้ำสาย)', province: 'เชียงราย', region: 'north', lat: 20.4435, lng: 99.8805, depthCm: 25, status: 'critical', traffic: 'น้ำป่าหลากท่วมตลาดสายลมจอย ปิดสะพาน', pumpCount: 6 },
+      { id: 'hu02', name: 'ถ.ช้างคลาน ไนท์บาซาร์ (ริมแม่น้ำปิง)', province: 'เชียงใหม่', region: 'north', lat: 18.7812, lng: 99.0015, depthCm: 20, status: 'critical', traffic: 'แม่น้ำปิงล้นตลิ่ง P.1 ท่วมผิวจราจร', pumpCount: 8 },
+      { id: 'hu03', name: 'เทศบาลเมืองสุโขทัยธานี (ริมแม่น้ำยม)', province: 'สุโขทัย', region: 'north', lat: 17.0078, lng: 99.8235, depthCm: 35, status: 'critical', traffic: 'น้ำยมเอ่อล้นแนวบิ๊กแบ็ก เข้าตัวเมือง', pumpCount: 10 },
+      { id: 'hu04', name: 'ชุมชนบ้านเวียงสา ริมน้ำน่าน', province: 'น่าน', region: 'north', lat: 18.5723, lng: 100.7456, depthCm: 18, status: 'warning', traffic: 'น้ำน่านทรงตัว น้ำขังพื้นที่ลุ่มต่ำ', pumpCount: 4 },
+      { id: 'hu05', name: 'อ.วารินชำราบ ชุมชนท่ากอไผ่ (ริมแม่น้ำมูล)', province: 'อุบลราชธานี', region: 'isan', lat: 15.2014, lng: 104.8623, depthCm: 40, status: 'critical', traffic: 'จุดตัด M.7 น้ำมูลล้นตลิ่ง ท่วมสะพานเสรีประชาธิปไตย', pumpCount: 12 },
+      { id: 'hu06', name: 'เทศบาลเมืองร้อยเอ็ด (ริมแม่น้ำชี)', province: 'ร้อยเอ็ด', region: 'isan', lat: 16.0543, lng: 103.6521, depthCm: 15, status: 'warning', traffic: 'ระดับน้ำชีหนุนสูง ชะลอตัวช่วงสะพาน', pumpCount: 5 },
+      { id: 'hu07', name: 'อ.เสนา ริมคลองโผงเผง-บางบาล', province: 'อยุธยา', region: 'central', lat: 14.3256, lng: 100.4054, depthCm: 45, status: 'critical', traffic: 'น้ำนอกคันกั้นน้ำท่วมใต้ถุนบ้าน สัญจรทางเรือ', pumpCount: 6 },
+      { id: 'hu08', name: 'แยกบางพลี-กิ่งแก้ว (ถ.เทพรัตน กม.12)', province: 'สมุทรปราการ', region: 'central', lat: 13.6354, lng: 100.7123, depthCm: 18, status: 'warning', traffic: 'น้ำรอระบายคู่ขนาน รถเล็กผ่านลำบาก', pumpCount: 6 },
+      { id: 'hu09', name: 'ตลาดกิมหยง ถ.เสน่หานุสรณ์ (หาดใหญ่)', province: 'สงขลา', region: 'south', lat: 7.0078, lng: 100.4712, depthCm: 10, status: 'normal', traffic: 'คลอง ร.1 ระบายน้ำได้คล่องตัว ผิวทางแห้ง', pumpCount: 4 },
+      { id: 'hu10', name: 'อ.พุนพิน ริมแม่น้ำตาปี', province: 'สุราษฎร์ธานี', region: 'south', lat: 9.1123, lng: 99.2345, depthCm: 22, status: 'critical', traffic: 'แม่น้ำตาปีเอ่อล้นเข้าท่วมถนนหน้าสถานีรถไฟ', pumpCount: 7 },
+      { id: 'hu11', name: 'ถ.ถลาง เมืองเก่าภูเก็ต', province: 'ภูเก็ต', region: 'south', lat: 7.8845, lng: 98.3889, depthCm: 15, status: 'warning', traffic: 'น้ำป่าระบายลงทะเลช้าเมื่อน้ำทะเลหนุน', pumpCount: 3 },
+      { id: 'hu12', name: 'เทศบาลเมืองชลบุรี (แยกเฉลิมไทย)', province: 'ชลบุรี', region: 'east', lat: 13.3645, lng: 100.9856, depthCm: 12, status: 'warning', traffic: 'น้ำรอระบายถนนสุขุมวิทขาเข้า', pumpCount: 4 },
+      { id: 'hu13', name: 'อ.แกลง ริมคลองประแสร์', province: 'ระยอง', region: 'east', lat: 12.7812, lng: 101.6523, depthCm: 20, status: 'warning', traffic: 'น้ำท่วมสวนผลไม้และเส้นทางเลียบคลอง', pumpCount: 5 },
+      { id: 'hu14', name: 'ริมแม่น้ำจันทบุรี (สะพานตรีรัตน์)', province: 'จันทบุรี', region: 'east', lat: 12.6105, lng: 102.1089, depthCm: 14, status: 'normal', traffic: 'ประตูระบายน้ำคลองภักดีรำไพเปิดเต็มที่', pumpCount: 6 },
+
+      // BKK Main Hotspots (22 จุดเสี่ยงหลัก กทม.)
+      { id: 'hb01', name: 'ถ.วิภาวดีรังสิต (แยกดินแดง - ปากซอยมิตรไมตรี)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.7680, lng: 100.5560, depthCm: 14, status: 'critical', traffic: 'น้ำท่วม 1 ช่องจราจรฝั่งซ้าย ชะลอตัว', pumpCount: 4 },
+      { id: 'hb02', name: 'ถ.รัชดาภิเษก (หน้าศาลอาญา - แยกรัชโยธิน)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.8210, lng: 100.5730, depthCm: 12, status: 'warning', traffic: 'มีน้ำขังเลนซ้ายสุด รถเล็กผ่านช้า', pumpCount: 3 },
+      { id: 'hb03', name: 'ถ.แจ้งวัฒนะ (วงเวียนหลักสี่ - เมืองทองธานี)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.8980, lng: 100.5650, depthCm: 20, status: 'critical', traffic: 'น้ำท่วมผิวทางเสมอทางเท้า 2 เลน', pumpCount: 6 },
+      { id: 'hb04', name: 'ถ.รามคำแหง (หน้า ม.รามคำแหง - แยกลำสาลี)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.7580, lng: 100.6210, depthCm: 15, status: 'critical', traffic: 'ชะลอตัวหนักช่วงแนวก่อสร้าง', pumpCount: 4 },
+      { id: 'hb05', name: 'ถ.สุขุมวิท 71 (ปรีดี พนมยงค์)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.7220, lng: 100.5930, depthCm: 10, status: 'warning', traffic: 'มีน้ำรอระบายช่วงท้ายซอย', pumpCount: 3 },
+      { id: 'hb06', name: 'ถ.ลาดพร้าว (แยกโชคชัย 4 - ปากซอยลาดพร้าว 87)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.7930, lng: 100.6050, depthCm: 12, status: 'warning', traffic: 'น้ำรอระบายเลนคู่ขนาน', pumpCount: 3 },
+      { id: 'hb07', name: 'ถ.ฉลองกรุง (หน้า สจล. ลาดกระบัง KMITL)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.7298, lng: 100.7765, depthCm: 8, status: 'warning', traffic: 'น้ำรอระบายเลนซ้ายสุด ผ่านได้', pumpCount: 5 },
+      { id: 'hb08', name: 'วงเวียนบางเขน (หลักสี่-รามอินทรา)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.8745, lng: 100.5975, depthCm: 18, status: 'critical', traffic: 'ท่วมผิวทางวงเวียน 2 ช่องจราจร', pumpCount: 4 },
+      { id: 'hb09', name: 'ถ.ศรีนครินทร์ (วัดศรีเอี่ยม-ลาซาล)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.6680, lng: 100.6470, depthCm: 16, status: 'critical', traffic: 'มีน้ำขังใต้สะพานข้ามแยก', pumpCount: 6 },
+      { id: 'hb10', name: 'ถ.พัฒนาการ (แยกคลองตัน)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.7410, lng: 100.6010, depthCm: 10, status: 'warning', traffic: 'ชะลอตัวช่วงลงสะพาน', pumpCount: 3 },
+      { id: 'hb11', name: 'ถ.ประชาอุทิศ (ห้วยขวาง-เหม่งจ๋าย)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.7780, lng: 100.5820, depthCm: 6, status: 'normal', traffic: 'ผิวทางแห้ง เครื่องสูบพร้อมทำงาน', pumpCount: 2 },
+      { id: 'hb12', name: 'ถ.นวมินทร์ (แยกโพธิ์แก้ว)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.8020, lng: 100.6540, depthCm: 14, status: 'warning', traffic: 'น้ำขังหน้าหมู่บ้าน 1 เลน', pumpCount: 4 },
+      { id: 'hb13', name: 'ถ.เพชรเกษม (คลองบางหว้า)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.7180, lng: 100.4570, depthCm: 10, status: 'warning', traffic: 'น้ำรอระบายเลนซ้ายสุด', pumpCount: 3 },
+      { id: 'hb14', name: 'ถ.จรัญสนิทวงศ์ (แยกบางพลัด)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.7850, lng: 100.4950, depthCm: 12, status: 'warning', traffic: 'ชะลอตัวแนวก่อสร้าง', pumpCount: 3 },
+      { id: 'hb15', name: 'ถ.เอกชัย (แยกบางบอน)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.6650, lng: 100.4200, depthCm: 15, status: 'critical', traffic: 'ท่วมเสมอทางเท้าช่วงตลาด', pumpCount: 4 },
+      { id: 'hb16', name: 'ถ.วิภาวดีรังสิต (แยกสุทธิสาร)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.7880, lng: 100.5600, depthCm: 10, status: 'warning', traffic: 'ทางขนานมีน้ำขังเล็กน้อย', pumpCount: 4 },
+      { id: 'hb17', name: 'ถ.งามวงศ์วาน (แยกพงษ์เพชร)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.8560, lng: 100.5430, depthCm: 16, status: 'critical', traffic: 'หน้าตลาดพงษ์เพชรท่วมขัง 2 เลน', pumpCount: 5 },
+      { id: 'hb18', name: 'ซอยงามวงศ์วาน 47 (ชินเขต)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.8520, lng: 100.5510, depthCm: 18, status: 'critical', traffic: 'ท่วมตลอดแนวซอย ชะลอตัว', pumpCount: 3 },
+      { id: 'hb19', name: 'ถ.เสนานิคม 1 (ลาดพร้าว-วังหิน)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.8290, lng: 100.5900, depthCm: 14, status: 'warning', traffic: 'รถเล็กผ่านได้ชะลอตัว', pumpCount: 3 },
+      { id: 'hb20', name: 'ถ.สรงประภา (ดอนเมือง)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.9210, lng: 100.5900, depthCm: 12, status: 'warning', traffic: 'ช่วงหน้าวัดดอนเมือง มีน้ำรอระบาย', pumpCount: 4 },
+      { id: 'hb21', name: 'ถ.สุวินทวงศ์ (มีนบุรี-หนองจอก)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.8400, lng: 100.7850, depthCm: 10, status: 'warning', traffic: 'ช่วงสะพานข้ามคลอง น้ำขัง 1 เลน', pumpCount: 3 },
+      { id: 'hb22', name: 'ถ.บางนา-ตราด (กม.4 ใต้ทางด่วน)', province: 'กรุงเทพฯ', region: 'bkk', lat: 13.6640, lng: 100.6380, depthCm: 16, status: 'critical', traffic: 'ทางคู่ขนานท่วมขัง ชะลอตัวหนัก', pumpCount: 5 }
     ];
 
+    // ── RADAR STATIONS (16 THAILAND TMD & BKK + 8 GLOBAL MET CENTERS = 24) ──
+    const RADAR_STATIONS = [
+      // Thailand TMD & BKK Radars
+      { name: 'สถานีเรดาร์หนองจอก (กทม.)', en: 'Nong Chok Radar', lat: 13.8551, lng: 100.8657, radiusKm: 120, status: 'ออนไลน์', type: 'Doppler Dual-Pol' },
+      { name: 'สถานีเรดาร์หนองแขม (กทม.)', en: 'Nong Khaem Radar', lat: 13.7058, lng: 100.3486, radiusKm: 120, status: 'ออนไลน์', type: 'Doppler Dual-Pol' },
+      { name: 'สถานีเรดาร์สุวรรณภูมิ', en: 'Suvarnabhumi Radar', lat: 13.6900, lng: 100.7501, radiusKm: 120, status: 'ออนไลน์', type: 'Doppler Terminal' },
+      { name: 'สถานีเรดาร์อมก๋อย (เชียงใหม่)', en: 'Omkoi Radar', lat: 17.7981, lng: 98.4312, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์ลำปาง', en: 'Lampang Radar', lat: 18.2812, lng: 99.5056, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์พิษณุโลก', en: 'Phitsanulok Radar', lat: 16.7812, lng: 100.2789, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์ขอนแก่น', en: 'Khon Kaen Radar', lat: 16.4654, lng: 102.7845, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์สกลนคร', en: 'Sakon Nakhon Radar', lat: 17.1892, lng: 104.1189, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์อุบลราชธานี', en: 'Ubon Ratchathani Radar', lat: 15.2505, lng: 104.8712, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์ตาคลี (นครสวรรค์)', en: 'Takhli Radar', lat: 15.2654, lng: 100.3123, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์สัตหีบ (ชลบุรี)', en: 'Sattahip Radar', lat: 12.6712, lng: 100.9023, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์หัวหิน (ประจวบฯ)', en: 'Hua Hin Radar', lat: 12.6345, lng: 99.9512, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์สุราษฎร์ธานี (พุนพิน)', en: 'Surat Thani Radar', lat: 9.1354, lng: 99.1412, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์ภูเก็ต', en: 'Phuket Radar', lat: 8.1123, lng: 98.3078, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์สิงหนคร (สงขลา)', en: 'Songkhla Radar', lat: 7.2145, lng: 100.5892, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+      { name: 'สถานีเรดาร์กระบี่', en: 'Krabi Radar', lat: 8.0987, lng: 98.9856, radiusKm: 240, status: 'ออนไลน์', type: 'TMD Doppler C-Band' },
+
+      // Global Meteorological Observatories
+      { name: 'JMA Tokyo Radar & Cyclone Center', en: 'Japan Meteorological Agency', lat: 35.6895, lng: 139.6917, radiusKm: 300, status: 'ออนไลน์ (Global Network)', type: 'WMO Typhoon Center' },
+      { name: 'KMA Seoul Weather Radar', en: 'Korea Meteorological Administration', lat: 37.4932, lng: 126.9234, radiusKm: 250, status: 'ออนไลน์ (Global Network)', type: 'Doppler Network' },
+      { name: 'Hong Kong Observatory (HKO)', en: 'Hong Kong Observatory', lat: 22.3022, lng: 114.1747, radiusKm: 256, status: 'ออนไลน์ (Global Network)', type: 'Dual-Pol Doppler' },
+      { name: 'BoM Sydney Radar (Terrey Hills)', en: 'Australian Bureau of Meteorology', lat: -33.7008, lng: 151.2093, radiusKm: 256, status: 'ออนไลน์ (Global Network)', type: 'Doppler S-Band' },
+      { name: 'NOAA Weather Radar (New York KOKX)', en: 'NOAA / NWS Brookhaven NY', lat: 40.8656, lng: -72.8628, radiusKm: 300, status: 'ออนไลน์ (Global Network)', type: 'NEXRAD Dual-Pol' },
+      { name: 'Met Office UK (Chenies Radar)', en: 'UK Met Office Weather Radar', lat: 51.6833, lng: -0.5333, radiusKm: 250, status: 'ออนไลน์ (Global Network)', type: 'C-Band Dual-Pol' },
+      { name: 'DWD Frankfurt Radar', en: 'Deutscher Wetterdienst (Germany)', lat: 50.0456, lng: 8.5678, radiusKm: 250, status: 'ออนไลน์ (Global Network)', type: 'Doppler Weather Radar' },
+      { name: 'ECMWF Global Forecast Headquarters', en: 'European Centre for Medium-Range Weather', lat: 51.4192, lng: -0.9536, radiusKm: 500, status: 'ออนไลน์ (Global Supercomputer)', type: 'AI & Ensemble Model' }
+    ];
+
+    // ── SAFE HAVENS (จุดจอดรถฉุกเฉิน) ──
     const SAFE_HAVENS = [
-      { id: 's01', name: 'อาคารเฉลิมพระเกียรติฯ สจล. ลาดกระบัง (KMITL)', district: 'ลาดกระบัง', lat: 13.7290, lng: 100.7785, capacityCars: 500, status: 'พร้อมรับรถยนต์', contact: '02-329-8111' },
-      { id: 's02', name: 'ไบเทค บางนา (BITEC Elevated Parking)', district: 'บางนา', lat: 13.6700, lng: 100.6080, capacityCars: 2500, status: 'เปิดอาคารจอดชั้น 2-4', contact: '02-726-1999' },
-      { id: 's03', name: 'เมกาบางนา (Mega Bangna Multi-level)', district: 'บางนา', lat: 13.6460, lng: 100.6800, capacityCars: 4000, status: 'จุดจอดปลอดภัยโซนตะวันออก', contact: '02-105-1000' },
-      { id: 's04', name: 'เซ็นทรัลพลาซา ลาดพร้าว (ชั้น 3-7)', district: 'จตุจักร', lat: 13.8160, lng: 100.5600, capacityCars: 1800, status: 'จุดจอดปลอดภัยโซนเหนือ', contact: '02-793-6000' },
-      { id: 's05', name: 'ศูนย์ราชการแจ้งวัฒนะ (อาคาร B)', district: 'หลักสี่', lat: 13.8820, lng: 100.5650, capacityCars: 3000, status: 'อาคารจอดรถยกระดับ', contact: '02-143-7777' },
-      { id: 's06', name: 'ฟิวเจอร์พาร์ค รังสิต (อาคารในร่ม)', district: 'รังสิต', lat: 13.9890, lng: 100.6180, capacityCars: 3500, status: 'รองรับรถยนต์หนีน้ำ', contact: '02-958-0011' }
+      { id: 's01', name: 'อาคารเฉลิมพระเกียรติฯ สจล. ลาดกระบัง (KMITL)', province: 'กรุงเทพฯ', lat: 13.7290, lng: 100.7785, capacityCars: 500, status: 'พร้อมรับรถยนต์' },
+      { id: 's02', name: 'ไบเทค บางนา (BITEC Elevated Parking)', province: 'กรุงเทพฯ', lat: 13.6700, lng: 100.6080, capacityCars: 2500, status: 'เปิดอาคารจอดชั้น 2-4' },
+      { id: 's03', name: 'เมกาบางนา (Mega Bangna Multi-level)', province: 'สมุทรปราการ', lat: 13.6460, lng: 100.6800, capacityCars: 4000, status: 'จุดจอดปลอดภัยโซนตะวันออก' },
+      { id: 's04', name: 'เซ็นทรัลพลาซา ลาดพร้าว (ชั้น 3-7)', province: 'กรุงเทพฯ', lat: 13.8160, lng: 100.5600, capacityCars: 1800, status: 'จุดจอดปลอดภัยโซนเหนือ' },
+      { id: 's05', name: 'ศูนย์ราชการแจ้งวัฒนะ (อาคาร B)', province: 'กรุงเทพฯ', lat: 13.8820, lng: 100.5650, capacityCars: 3000, status: 'อาคารจอดรถยกระดับ' },
+      { id: 's06', name: 'ฟิวเจอร์พาร์ค รังสิต (อาคารในร่ม)', province: 'ปทุมธานี', lat: 13.9890, lng: 100.6180, capacityCars: 3500, status: 'รองรับรถยนต์หนีน้ำ' },
+      { id: 's07', name: 'ศูนย์ประชุมนานาชาติ ม.อ. หาดใหญ่', province: 'สงขลา', lat: 7.0054, lng: 100.5012, capacityCars: 1200, status: 'พื้นที่สูงน้ำไม่ท่วม' },
+      { id: 's08', name: 'ศูนย์ประชุมและแสดงสินค้านานาชาติ เชียงใหม่', province: 'เชียงใหม่', lat: 18.8256, lng: 98.9645, capacityCars: 1500, status: 'จุดรวมพลฉุกเฉินน้ำปิงล้น' }
     ];
 
-    let citizenReports = [];
+    // ── CITIZEN REPORTS INITIAL STATE ──
+    let citizenReports = [
+      { id: 'cr01', name: 'สี่แยกท่าพระ น้ำผุดจากท่อระบาย', province: 'กรุงเทพฯ', lat: 13.7290, lng: 100.4735, depthCm: 15, timestamp: Date.now() - 1000 * 60 * 18, traffic: 'รถเล็กชะลอตัว' },
+      { id: 'cr02', name: 'ถนนสายลมจอย แม่สาย น้ำเริ่มไหลข้ามคัน', province: 'เชียงราย', lat: 20.4430, lng: 99.8810, depthCm: 25, timestamp: Date.now() - 1000 * 60 * 42, traffic: 'ปิดการจราจร' },
+      { id: 'cr03', name: 'ซอยอุดมสุข 45 น้ำท่วมเสมอทางเท้า', province: 'กรุงเทพฯ', lat: 13.6780, lng: 100.6230, depthCm: 18, timestamp: Date.now() - 1000 * 60 * 65, traffic: 'มอเตอร์ไซค์โปรดระวัง' }
+    ];
+
+    // ── MAP GLOBALS ──
     let map = null;
     let markersLayer = null;
-    let activeLayers = { basins: true, hotspots: true, reports: true, shelters: true, radar: true };
-
-    // ── RAIN RADAR STATE & ANIMATION ENGINE ──
-    let radarData = null;
     let radarTileLayers = [];
+    let radarData = null;
     let currentRadarIndex = -1;
     let isRadarPlaying = false;
     let radarPlayInterval = null;
-    let radarOpacity = 0.75;
+    let radarSpeedMs = 1000;
+    let activeLayers = { radar: true, basins: true, hotspots: true, stations: true, reports: true, shelters: true };
+    let currentScope = 'thailand';
+    let currentBasinFilter = 'all';
+    let currentHotspotFilter = 'all';
 
-    // ── RELATIVE TIME CALCULATOR (DYNAMIC CLIENT CLOCK) ──
+    // ── RELATIVE TIME FORMATTER ──
     function formatRelativeTime(ts) {
       if (!ts) return 'เมื่อสักครู่';
-      const numTs = Number(ts);
-      const now = Date.now();
-      const diffSec = Math.max(0, Math.floor((now - numTs) / 1000));
-      
+      const diffSec = Math.max(0, Math.floor((Date.now() - Number(ts)) / 1000));
       if (diffSec < 60) return 'เมื่อสักครู่';
       const diffMin = Math.floor(diffSec / 60);
       if (diffMin < 60) return diffMin + ' นาทีที่แล้ว';
       const diffHr = Math.floor(diffMin / 60);
-      if (diffHr < 24) return diffHr + ' ชั่วโมงที่แล้ว';
-      const diffDay = Math.floor(diffHr / 24);
-      return diffDay + ' วันที่แล้ว';
+      if (diffHr < 24) return diffHr + ' ชม. ที่แล้ว';
+      return Math.floor(diffHr / 24) + ' วันที่แล้ว';
     }
 
-    function formatTimeExact(ts) {
-      if (!ts) return '';
-      const d = new Date(Number(ts));
-      return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
-    }
-
-    // ── INITIALIZE MAP WITH CYBER DARK BASEMAP ──
+    // ── INITIALIZE MAP (GLOBAL READY) ──
     function initMap() {
       map = L.map('map', {
         zoomControl: false,
-        attributionControl: false
-      }).setView([13.7563, 100.5618], 11);
+        attributionControl: false,
+        minZoom: 2,
+        maxZoom: 18,
+        worldCopyJump: true
+      }).setView([13.2000, 101.0000], 6);
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      // Modern High-Contrast Cyber Dark Basemap (100% Free, Global, Crisp)
+      // Free Global Cyber Dark Basemap
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        className: 'dark-tiles'
+        className: 'dark-tiles',
+        maxZoom: 19
       }).addTo(map);
 
       markersLayer = L.layerGroup().addTo(map);
+
       renderAllMarkers();
       fetchRadarData();
     }
 
-    // ── RAIN RADAR INTEGRATION (RAINVIEWER & BKK COMPOSITE) ──
-    async function fetchRadarData() {
-      let data = null;
-      // 1. Try local/edge API first
-      try {
-        const res = await fetch('/api/radar');
-        if (res.ok) {
-          data = await res.json();
-        }
-      } catch(e) {}
+    // ── GLOBAL SCOPE NAVIGATOR ──
+    const SCOPES = {
+      thailand: { center: [13.2000, 101.0000], zoom: 6 },
+      global: { center: [20.0000, 15.0000], zoom: 3 },
+      bkk: { center: [13.7563, 100.5618], zoom: 11 },
+      north: { center: [18.7883, 99.5000], zoom: 8 },
+      isan: { center: [16.2000, 103.2000], zoom: 7 },
+      central: { center: [14.5000, 100.5000], zoom: 8 },
+      south: { center: [8.5000, 99.5000], zoom: 7 },
+      east: { center: [13.1000, 101.8000], zoom: 8 },
+      asean: { center: [4.0000, 108.0000], zoom: 5 },
+      east_asia: { center: [33.0000, 130.0000], zoom: 5 }
+    };
 
-      // 2. Fallback to direct RainViewer public API if /api/radar unavailable (e.g. Cloudflare Pages or file://)
-      if (!data || !data.radar || (!data.radar.past && !data.frames)) {
-        try {
-          const rvRes = await fetch('https://api.rainviewer.com/public/weather-maps.json');
-          if (rvRes.ok) {
-            data = await rvRes.json();
-          }
-        } catch(err) {
-          console.warn('Direct RainViewer fetch error:', err);
-        }
+    function zoomToScope(scopeKey) {
+      if (!map || !SCOPES[scopeKey]) return;
+      currentScope = scopeKey;
+
+      document.querySelectorAll('.scope-pill').forEach(btn => {
+        btn.classList.remove('active', 'bg-cyan-950', 'text-cyan-300', 'border-cyan-600');
+        btn.classList.add('bg-slate-800/80', 'text-slate-300', 'border-slate-700');
+      });
+      const activeBtn = document.getElementById('scope-' + scopeKey);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-800/80', 'text-slate-300', 'border-slate-700');
+        activeBtn.classList.add('active', 'bg-cyan-950', 'text-cyan-300', 'border-cyan-600');
       }
 
-      // 3. Fallback timestamp generator if offline
-      if (!data || !data.radar) {
-        const curr = Math.floor(Date.now() / 1000);
-        const aligned = curr - (curr % 600);
-        data = {
-          host: 'https://tilecache.rainviewer.com',
-          radar: { past: [], nowcast: [] }
-        };
-        for (let i = 12; i >= 0; i--) {
-          data.radar.past.push({ time: aligned - (i * 600), path: '/v2/radar/' + (aligned - (i * 600)) });
-        }
-      }
-
-      const past = (data.radar && data.radar.past) || data.past || [];
-      const nowcast = (data.radar && data.radar.nowcast) || data.nowcast || [];
-      const allFrames = (data.frames && data.frames.length > 0) ? data.frames : [...past, ...nowcast];
-
-      radarData = {
-        ...data,
-        frames: allFrames
-      };
-
-      initRadarLayers();
+      const cfg = SCOPES[scopeKey];
+      map.flyTo(cfg.center, cfg.zoom, { duration: 1.5 });
+      switchTab('map');
     }
 
-    function initRadarLayers() {
-      if (!map || !radarData || !radarData.frames || radarData.frames.length === 0) return;
+    function quickJump(lat, lng, zoom, label) {
+      if (!map) return;
+      map.flyTo([lat, lng], zoom, { duration: 1.5 });
+      switchTab('map');
+      
+      // Temporary pulse indicator
+      const pulseMarker = L.circleMarker([lat, lng], {
+        radius: 20,
+        color: '#00f0ff',
+        fillColor: '#00f0ff',
+        fillOpacity: 0.3
+      }).addTo(map);
 
-      // Clear existing tile layers if any
-      radarTileLayers.forEach(l => { if (map.hasLayer(l)) map.removeLayer(l); });
+      pulseMarker.bindPopup(`<div class="p-1 font-bold text-cyan-300 text-xs">📍 ${label}</div>`).openPopup();
+      setTimeout(() => map.removeLayer(pulseMarker), 8000);
+    }
+
+    // ── GLOBAL LOCATION SEARCH ENGINE ──
+    async function handleSearchSubmit() {
+      const input = document.getElementById('global-search-input');
+      const query = (input?.value || '').trim();
+      if (!query) return;
+
+      const suggestionsBox = document.getElementById('search-suggestions');
+      const resultsContainer = document.getElementById('search-results-list');
+      if (resultsContainer) resultsContainer.innerHTML = '<div class="text-[11px] text-cyan-400 p-2">กำลังค้นหาพิกัดทั่วโลก...</div>';
+      if (suggestionsBox) suggestionsBox.classList.remove('hidden');
+
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+        if (!res.ok) throw new Error('Search request failed');
+        const results = await res.json();
+
+        if (results && results.length > 0) {
+          resultsContainer.innerHTML = '';
+          results.forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-slate-200 border-b border-slate-800/60 transition block';
+            btn.innerHTML = `<div class="font-bold text-cyan-300 text-xs">${item.display_name.split(',')[0]}</div><div class="text-[10px] text-slate-400 truncate">${item.display_name}</div>`;
+            btn.onclick = () => {
+              const lat = parseFloat(item.lat);
+              const lon = parseFloat(item.lon);
+              quickJump(lat, lon, 10, item.display_name.split(',')[0]);
+              clearSearch();
+            };
+            resultsContainer.appendChild(btn);
+          });
+
+          // Auto jump to top result on Enter
+          const top = results[0];
+          quickJump(parseFloat(top.lat), parseFloat(top.lon), 10, top.display_name.split(',')[0]);
+        } else {
+          resultsContainer.innerHTML = '<div class="text-[11px] text-rose-400 p-2">ไม่พบสถานที่ กรุณาลองใช้ชื่อภาษาอังกฤษหรือชื่อเมืองหลัก</div>';
+        }
+      } catch (err) {
+        if (resultsContainer) resultsContainer.innerHTML = '<div class="text-[11px] text-amber-400 p-2">กำลังทำงานในโหมดออฟไลน์ ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</div>';
+      }
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('global-search-input');
+      if (input) input.value = '';
+      document.getElementById('search-suggestions')?.classList.add('hidden');
+      document.getElementById('clear-search-btn')?.classList.add('hidden');
+    }
+
+    document.getElementById('global-search-input')?.addEventListener('input', function() {
+      document.getElementById('clear-search-btn')?.classList.toggle('hidden', !this.value);
+    });
+
+    // ── RAINVIEWER WORLDWIDE RADAR ENGINE ──
+    async function fetchRadarData() {
+      try {
+        const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+        if (res.ok) {
+          radarData = await res.json();
+          setupRadarLayers();
+        }
+      } catch (e) {
+        console.warn('RainViewer global API notice:', e);
+      }
+    }
+
+    function setupRadarLayers() {
+      if (!radarData || !radarData.radar || !radarData.radar.past) return;
+      const host = radarData.host || 'https://tilecache.rainviewer.com';
+      const frames = [...(radarData.radar.past || [])];
+      if (radarData.radar.nowcast) frames.push(...radarData.radar.nowcast);
+
+      // Clean existing layers
+      radarTileLayers.forEach(l => map.removeLayer(l));
       radarTileLayers = [];
 
-      const host = radarData.host || 'https://tilecache.rainviewer.com';
-      
-      // Build tile layer for each frame with smooth native zoom scaling
-      radarData.frames.forEach((frame) => {
-        const layer = L.tileLayer(host + frame.path + '/256/{z}/{x}/{y}/2/1_1.png', {
+      frames.forEach(frame => {
+        const layer = L.tileLayer(`${host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`, {
           opacity: 0,
           maxZoom: 18,
           maxNativeZoom: 7,
@@ -1112,173 +1092,137 @@
 
       const slider = document.getElementById('radar-slider');
       if (slider) {
-        slider.max = radarData.frames.length - 1;
-        slider.value = radarData.frames.length - 1;
+        slider.max = frames.length - 1;
+        slider.value = frames.length - 1;
       }
 
-      setRadarFrame(radarData.frames.length - 1);
+      setRadarFrame(frames.length - 1);
     }
 
-    function setRadarFrame(index) {
+    function setRadarFrame(idx) {
       if (!radarTileLayers || radarTileLayers.length === 0) return;
-      if (index < 0 || index >= radarTileLayers.length) return;
+      if (idx < 0 || idx >= radarTileLayers.length) return;
 
-      const prevIndex = currentRadarIndex;
-      currentRadarIndex = index;
+      const prev = currentRadarIndex;
+      currentRadarIndex = idx;
 
       if (activeLayers.radar) {
-        // Show target frame
-        const currentLayer = radarTileLayers[currentRadarIndex];
-        if (!map.hasLayer(currentLayer)) {
-          currentLayer.addTo(map);
+        if (radarTileLayers[currentRadarIndex] && !map.hasLayer(radarTileLayers[currentRadarIndex])) {
+          radarTileLayers[currentRadarIndex].addTo(map);
         }
-        currentLayer.setOpacity(radarOpacity);
-
-        // Hide previous frame
-        if (prevIndex >= 0 && prevIndex !== currentRadarIndex && radarTileLayers[prevIndex]) {
-          radarTileLayers[prevIndex].setOpacity(0);
-          if (map.hasLayer(radarTileLayers[prevIndex])) {
-            setTimeout(() => {
-              if (prevIndex !== currentRadarIndex) map.removeLayer(radarTileLayers[prevIndex]);
-            }, 250);
-          }
+        if (radarTileLayers[currentRadarIndex]) {
+          radarTileLayers[currentRadarIndex].setOpacity(0.78);
+        }
+        if (prev >= 0 && prev !== currentRadarIndex && radarTileLayers[prev]) {
+          radarTileLayers[prev].setOpacity(0);
         }
       }
 
-      // Update HUD labels
-      const frame = radarData.frames[currentRadarIndex];
-      const frameTs = frame ? frame.time * 1000 : Date.now();
-      const isLatest = currentRadarIndex === radarData.frames.length - 1;
-      
-      const timeLabel = document.getElementById('radar-time-label');
-      if (timeLabel) {
-        timeLabel.textContent = formatTimeExact(frameTs) + (isLatest ? ' (สด)' : '');
-      }
-
-      const statusLabel = document.getElementById('radar-frame-status');
-      if (statusLabel) {
-        statusLabel.textContent = isLatest ? 'เฟรมสดล่าสุด (Real-time)' : formatRelativeTime(frameTs);
+      // Update time label
+      const frames = [...(radarData.radar.past || []), ...(radarData.radar.nowcast || [])];
+      const curFrame = frames[currentRadarIndex];
+      const label = document.getElementById('radar-time-label');
+      if (curFrame && label) {
+        const date = new Date(curFrame.time * 1000);
+        const isNowcast = currentRadarIndex >= (radarData.radar.past || []).length;
+        label.textContent = (isNowcast ? '🔮 คาดการณ์: ' : '📡 ') + date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
       }
 
       const slider = document.getElementById('radar-slider');
-      if (slider && Number(slider.value) !== currentRadarIndex) {
-        slider.value = currentRadarIndex;
-      }
-    }
-
-    function toggleRadarLayer(forceState) {
-      if (typeof forceState === 'boolean') {
-        activeLayers.radar = forceState;
-      } else {
-        activeLayers.radar = !activeLayers.radar;
-      }
-
-      const btn = document.getElementById('toggle-radar');
-      if (btn) {
-        btn.classList.toggle('opacity-40', !activeLayers.radar);
-        btn.classList.toggle('border-cyan-500', activeLayers.radar);
-      }
-
-      const hud = document.getElementById('radar-hud-controller');
-      if (hud) {
-        hud.classList.toggle('hidden', !activeLayers.radar);
-      }
-
-      if (!activeLayers.radar) {
-        stopRadarPlay();
-        radarTileLayers.forEach(l => {
-          if (map.hasLayer(l)) map.removeLayer(l);
-        });
-      } else {
-        setRadarFrame(currentRadarIndex >= 0 ? currentRadarIndex : radarTileLayers.length - 1);
-      }
-      renderAllMarkers();
-    }
-
-    function toggleRadarHud(show) {
-      const hud = document.getElementById('radar-hud-controller');
-      if (hud) hud.classList.toggle('hidden', !show);
+      if (slider) slider.value = currentRadarIndex;
     }
 
     function toggleRadarPlay() {
+      isRadarPlaying = !isRadarPlaying;
+      const btn = document.getElementById('btn-radar-play');
+      const icon = document.getElementById('play-icon');
+      const txt = document.getElementById('play-text');
+
       if (isRadarPlaying) {
-        stopRadarPlay();
+        if (icon) icon.textContent = '⏸';
+        if (txt) txt.textContent = 'หยุด';
+        btn?.classList.replace('bg-cyan-600', 'bg-rose-600');
+
+        radarPlayInterval = setInterval(() => {
+          let next = currentRadarIndex + 1;
+          if (next >= radarTileLayers.length) next = 0;
+          setRadarFrame(next);
+        }, radarSpeedMs);
       } else {
-        startRadarPlay();
-      }
-    }
-
-    function startRadarPlay() {
-      if (!radarTileLayers || radarTileLayers.length === 0) return;
-      isRadarPlaying = true;
-      document.getElementById('radar-play-icon').textContent = '⏸️';
-      document.getElementById('radar-play-text').textContent = 'หยุด';
-
-      radarPlayInterval = setInterval(() => {
-        let nextIndex = currentRadarIndex + 1;
-        if (nextIndex >= radarTileLayers.length) {
-          nextIndex = 0;
-        }
-        setRadarFrame(nextIndex);
-      }, 750);
-    }
-
-    function stopRadarPlay() {
-      isRadarPlaying = false;
-      if (radarPlayInterval) {
+        if (icon) icon.textContent = '▶';
+        if (txt) txt.textContent = 'เล่นลูป';
+        btn?.classList.replace('bg-rose-600', 'bg-cyan-600');
         clearInterval(radarPlayInterval);
-        radarPlayInterval = null;
-      }
-      const icon = document.getElementById('radar-play-icon');
-      const text = document.getElementById('radar-play-text');
-      if (icon) icon.textContent = '▶️';
-      if (text) text.textContent = 'เล่นวนลูป';
-    }
-
-    function onRadarSliderChange(val) {
-      stopRadarPlay();
-      setRadarFrame(Number(val));
-    }
-
-    function onRadarOpacityChange(val) {
-      radarOpacity = Number(val) / 100;
-      document.getElementById('opacity-val').textContent = val + '%';
-      if (currentRadarIndex >= 0 && radarTileLayers[currentRadarIndex]) {
-        radarTileLayers[currentRadarIndex].setOpacity(radarOpacity);
       }
     }
 
-    // ── RENDER MARKERS ON MAP ──
+    function handleRadarSlider(val) {
+      if (isRadarPlaying) toggleRadarPlay();
+      setRadarFrame(parseInt(val, 10));
+    }
+
+    function setRadarSpeed(ms) {
+      radarSpeedMs = parseInt(ms, 10);
+      if (isRadarPlaying) {
+        clearInterval(radarPlayInterval);
+        radarPlayInterval = setInterval(() => {
+          let next = currentRadarIndex + 1;
+          if (next >= radarTileLayers.length) next = 0;
+          setRadarFrame(next);
+        }, radarSpeedMs);
+      }
+    }
+
+    function toggleRadarLayer(forceOn = null) {
+      if (forceOn !== null) activeLayers.radar = forceOn;
+      else activeLayers.radar = !activeLayers.radar;
+
+      const btn = document.getElementById('toggle-radar');
+      btn?.classList.toggle('opacity-40', !activeLayers.radar);
+
+      if (!activeLayers.radar) {
+        radarTileLayers.forEach(l => l.setOpacity(0));
+      } else {
+        setRadarFrame(currentRadarIndex);
+      }
+    }
+
+    // ── RENDER MAP MARKERS ──
     function renderAllMarkers() {
       if (!markersLayer) return;
       markersLayer.clearLayers();
 
-      // 1. Retention Basins (แก้มลิง)
+      // 1. DAMS & RETENTION BASINS (41)
       if (activeLayers.basins) {
-        RETENTION_BASINS.forEach(b => {
-          const remainPercent = Math.round(((b.capacityM3 - b.currentM3) / b.capacityM3) * 100);
-          const isWarning = remainPercent < 30;
-          const strokeColor = isWarning ? '#f59e0b' : '#00f0ff';
-          const bgColor = isWarning ? 'rgba(245,158,11,0.25)' : 'rgba(0,240,255,0.20)';
+        DAMS_AND_BASINS.forEach(b => {
+          const isDam = b.type === 'dam';
+          const fillPercent = Math.round((b.currentM3 / b.capacityM3) * 100);
+          const isWarning = fillPercent > 80;
+          const strokeColor = isWarning ? '#f59e0b' : (isDam ? '#0284c7' : '#00f0ff');
+          const bgColor = isWarning ? 'rgba(245,158,11,0.3)' : (isDam ? 'rgba(2,132,199,0.3)' : 'rgba(0,240,255,0.25)');
 
-          const iconHtml = '<div style="background:' + bgColor + '; border:2px solid ' + strokeColor + ';" class="w-8 h-8 rounded-full flex flex-col items-center justify-center shadow-lg backdrop-blur"><span style="font-size:12px;">🏞️</span></div>';
+          const iconHtml = `<div style="background:${bgColor}; border:2px solid ${strokeColor};" class="w-8 h-8 rounded-full flex items-center justify-center shadow-lg backdrop-blur text-sm">${isDam ? '🏔️' : '🏞️'}</div>`;
           const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
 
           const marker = L.marker([b.lat, b.lng], { icon: customIcon });
           marker.bindPopup(`
-            <div class="p-2 space-y-2 min-w-[220px] font-sans">
-              <div class="flex items-center justify-between border-b border-slate-700 pb-1.5">
+            <div class="p-2 space-y-1.5 min-w-[220px] font-sans">
+              <div class="flex items-center justify-between border-b border-slate-700 pb-1">
                 <span class="font-bold text-cyan-300 text-xs">${b.name}</span>
-                <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">แก้มลิง</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded ${isDam ? 'bg-blue-950 text-blue-300 border border-blue-800' : 'bg-cyan-950 text-cyan-400 border border-cyan-800'}">
+                  ${isDam ? 'เขื่อนหลัก' : 'แก้มลิง'}
+                </span>
               </div>
               <div class="text-[11px] text-slate-300 space-y-1">
-                <div class="flex justify-between"><span>เขต:</span><span class="font-medium text-white">${b.district}</span></div>
-                <div class="flex justify-between"><span>ความจุเหลือว่าง:</span><span class="font-mono font-bold ${isWarning ? 'text-amber-400' : 'text-emerald-400'}">${remainPercent}%</span></div>
-                <div class="flex justify-between"><span>น้ำกักเก็บปัจจุบัน:</span><span class="font-mono text-white">${(b.currentM3/1000000).toFixed(2)} / ${(b.capacityM3/1000000).toFixed(2)} ล้าน m³</span></div>
-                <div class="flex justify-between"><span>อัตราการระบาย:</span><span class="font-mono text-slate-400">${b.drainRateM3s} m³/s</span></div>
-              </div>
-              <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                <div class="bg-cyan-400 h-1.5 rounded-full" style="width:${100-remainPercent}%"></div>
+                <div class="flex justify-between"><span>จังหวัด:</span><span class="font-semibold text-white">${b.province}</span></div>
+                <div class="flex justify-between"><span>ปริมาณน้ำกักเก็บ:</span><span class="font-bold text-cyan-400">${b.currentM3.toLocaleString()} / ${b.capacityM3.toLocaleString()} ${isDam ? 'ล้าน ลบ.ม.' : 'ล้าน ลบ.ม.'}</span></div>
+                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                  <div class="h-full ${isWarning ? 'bg-amber-400' : 'bg-cyan-400'}" style="width: ${fillPercent}%"></div>
+                </div>
+                <div class="flex justify-between text-[10px] text-slate-400">
+                  <span>ความจุ: ${fillPercent}%</span>
+                  <span>ระบาย: ${b.outflowRate} ลบ.ม./วิ</span>
+                </div>
               </div>
             </div>
           `);
@@ -1286,29 +1230,30 @@
         });
       }
 
-      // 2. Flood Hotspots (จุดเสี่ยง)
+      // 2. FLOOD HOTSPOTS (36)
       if (activeLayers.hotspots) {
         FLOOD_HOTSPOTS.forEach(h => {
           const isCrit = h.status === 'critical';
           const pulseClass = isCrit ? 'pulse-danger' : (h.status === 'warning' ? 'pulse-warning' : '');
           const badgeBg = isCrit ? '#ef4444' : (h.status === 'warning' ? '#f59e0b' : '#10b981');
 
-          const iconHtml = '<div class="' + pulseClass + ' w-7 h-7 rounded-full flex items-center justify-center shadow-xl text-white font-mono font-bold text-[10px] border-2 border-white" style="background:' + badgeBg + '">' + h.depthCm + '</div>';
+          const iconHtml = `<div class="${pulseClass} w-7 h-7 rounded-full flex items-center justify-center shadow-xl text-white font-mono font-bold text-[10px] border-2 border-white" style="background:${badgeBg}">${h.depthCm}</div>`;
           const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
 
           const marker = L.marker([h.lat, h.lng], { icon: customIcon });
           marker.bindPopup(`
-            <div class="p-2 space-y-2 min-w-[230px] font-sans">
-              <div class="flex items-center justify-between border-b border-slate-700 pb-1.5">
+            <div class="p-2 space-y-1.5 min-w-[230px] font-sans">
+              <div class="flex items-center justify-between border-b border-slate-700 pb-1">
                 <span class="font-bold text-white text-xs">${h.name}</span>
                 <span class="text-[10px] px-1.5 py-0.5 rounded font-bold ${isCrit ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-amber-950 text-amber-300 border border-amber-800'}">
                   ${isCrit ? 'วิกฤต' : 'เฝ้าระวัง'}
                 </span>
               </div>
               <div class="text-[11px] text-slate-300 space-y-1">
-                <div class="flex justify-between"><span>ระดับน้ำขัง:</span><span class="font-mono font-bold text-rose-400">${h.depthCm} ซม.</span></div>
-                <div class="flex justify-between"><span>การจราจร:</span><span class="text-white">${h.traffic}</span></div>
-                <div class="flex justify-between"><span>เครื่องสูบน้ำ:</span><span class="font-mono text-cyan-400">เดินเครื่อง ${h.pumpCount} ตัว</span></div>
+                <div class="flex justify-between"><span>จังหวัด:</span><span class="text-white">${h.province}</span></div>
+                <div class="flex justify-between"><span>ระดับน้ำขัง:</span><span class="font-bold font-mono text-rose-400">${h.depthCm} ซม.</span></div>
+                <div class="text-[10px] text-amber-200 bg-amber-950/40 p-1.5 rounded border border-amber-900/60">${h.traffic}</div>
+                <div class="text-[10px] text-slate-400">เดินเครื่องสูบน้ำ: ${h.pumpCount} เครื่อง</div>
               </div>
             </div>
           `);
@@ -1316,83 +1261,67 @@
         });
       }
 
-      // 3. Citizen Reports (แจ้งเหตุประชาชน)
-      if (activeLayers.reports) {
-        citizenReports.forEach(r => {
-          const relTime = formatRelativeTime(r.timestamp);
-          const iconHtml = '<div class="w-8 h-8 rounded-xl bg-cyan-950 border-2 border-cyan-400 shadow-xl flex items-center justify-center text-cyan-200">📸</div>';
-          const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
-
-          const marker = L.marker([r.lat, r.lng], { icon: customIcon });
-          marker.bindPopup(`
-            <div class="p-2 space-y-2 max-w-[260px] font-sans">
-              <div class="flex items-center justify-between border-b border-slate-700 pb-1.5">
-                <span class="font-bold text-cyan-300 text-xs">${r.name}</span>
-                <span class="text-[10px] font-mono text-cyan-400">${relTime}</span>
-              </div>
-              ${r.imageUrl ? `
-                <div class="rounded-lg overflow-hidden border border-slate-700 cursor-pointer" onclick="openPhotoModal('${r.imageUrl}', '${r.name}', '${relTime}')">
-                  <img src="${r.imageUrl}" alt="${r.name}" class="w-full h-28 object-cover hover:opacity-90 transition">
-                </div>
-              ` : ''}
-              <div class="text-[11px] text-slate-300 space-y-1">
-                <div class="flex justify-between"><span>ระดับน้ำ:</span><span class="font-mono font-bold text-amber-400">${r.depthCm} cm (${r.levelText})</span></div>
-                <div class="flex justify-between"><span>ผู้แจ้ง:</span><span class="text-white">${r.reporter || 'พลเมืองดี'}</span></div>
-                <p class="text-[10px] text-slate-400 mt-1 italic">${r.note || ''}</p>
-              </div>
-            </div>
-          `);
-          markersLayer.addLayer(marker);
-        });
-      }
-
-      // 4. Safe Havens / Parking (จุดจอดรถฉุกเฉิน)
-      if (activeLayers.shelters) {
-        SAFE_HAVENS.forEach(s => {
-          const iconHtml = '<div class="w-7 h-7 rounded-lg bg-blue-900 border-2 border-blue-400 shadow-lg flex items-center justify-center text-white font-bold text-xs">🅿️</div>';
-          const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
-
-          const marker = L.marker([s.lat, s.lng], { icon: customIcon });
-          marker.bindPopup(`
-            <div class="p-2 space-y-1.5 min-w-[210px] font-sans">
-              <div class="flex items-center justify-between border-b border-slate-700 pb-1">
-                <span class="font-bold text-blue-300 text-xs">${s.name}</span>
-              </div>
-              <div class="text-[11px] text-slate-300 space-y-0.5">
-                <div class="flex justify-between"><span>ความจุ:</span><span class="font-mono text-white">${s.capacityCars.toLocaleString()} คัน</span></div>
-                <div class="flex justify-between"><span>สถานะ:</span><span class="text-emerald-400">${s.status}</span></div>
-                <div class="flex justify-between"><span>โทรติดต่อ:</span><a href="tel:${s.contact}" class="font-mono text-cyan-400 underline">${s.contact}</a></div>
-              </div>
-            </div>
-          `);
-          markersLayer.addLayer(marker);
-        });
-      }
-
-      // 5. Rain Radar Stations (3 สถานีหลัก กทม.)
-      if (activeLayers.radar) {
-        const RADAR_STATIONS = [
-          { name: 'สถานีเรดาร์หนองจอก', en: 'Nong Chok Radar', lat: 13.8551, lng: 100.8657, radiusKm: 120, status: 'ออนไลน์ (กำลังสแกน)', type: 'Doppler Dual-Pol' },
-          { name: 'สถานีเรดาร์หนองแขม', en: 'Nong Khaem Radar', lat: 13.7058, lng: 100.3486, radiusKm: 120, status: 'ออนไลน์ (กำลังสแกน)', type: 'Doppler Dual-Pol' },
-          { name: 'สถานีเรดาร์สุวรรณภูมิ', en: 'Suvarnabhumi Radar', lat: 13.6900, lng: 100.7501, radiusKm: 120, status: 'ออนไลน์ (กำลังสแกน)', type: 'Doppler Terminal' }
-        ];
-
+      // 3. RADAR STATIONS (24)
+      if (activeLayers.stations) {
         RADAR_STATIONS.forEach(st => {
-          const iconHtml = '<div class="w-8 h-8 rounded-full bg-cyan-950/90 border-2 border-cyan-400 shadow-xl flex items-center justify-center text-cyan-300 text-xs font-bold" title="' + st.name + '">📡</div>';
+          const isGlobal = st.lat < 0 || st.lat > 22 || st.lng < 95 || st.lng > 110;
+          const iconHtml = `<div class="w-8 h-8 rounded-full ${isGlobal ? 'bg-purple-950/90 border-purple-400' : 'bg-cyan-950/90 border-cyan-400'} border-2 shadow-xl flex items-center justify-center text-sm">📡</div>`;
           const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
 
           const marker = L.marker([st.lat, st.lng], { icon: customIcon });
           marker.bindPopup(`
-            <div class="p-2 space-y-1.5 min-w-[210px] font-sans">
-              <div class="flex items-center justify-between border-b border-slate-700 pb-1">
-                <span class="font-bold text-cyan-300 text-xs">${st.name}</span>
-                <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">ONLINE</span>
+            <div class="p-2 space-y-1 min-w-[210px] font-sans">
+              <div class="font-bold ${isGlobal ? 'text-purple-300' : 'text-cyan-300'} text-xs">${st.name}</div>
+              <div class="text-[10px] text-slate-400">${st.en}</div>
+              <div class="text-[11px] text-slate-200 mt-1">
+                <div>สถานะ: <span class="text-emerald-400 font-semibold">${st.status}</span></div>
+                <div>ระบบ: <span class="font-mono text-slate-300">${st.type}</span></div>
+                <div>รัศมีตรวจจับ: <span class="font-mono text-cyan-400">${st.radiusKm} กม.</span></div>
               </div>
+            </div>
+          `);
+          markersLayer.addLayer(marker);
+        });
+      }
+
+      // 4. CITIZEN REPORTS
+      if (activeLayers.reports) {
+        citizenReports.forEach(r => {
+          const iconHtml = `<div class="w-8 h-8 rounded-xl bg-cyan-950 border-2 border-cyan-400 shadow-xl flex items-center justify-center text-cyan-200">📸</div>`;
+          const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
+
+          const marker = L.marker([r.lat, r.lng], { icon: customIcon });
+          marker.bindPopup(`
+            <div class="p-2 space-y-1.5 max-w-[240px] font-sans">
+              <div class="flex items-center justify-between border-b border-slate-700 pb-1">
+                <span class="font-bold text-cyan-300 text-xs">${r.name}</span>
+                <span class="text-[10px] font-mono text-cyan-400">${formatRelativeTime(r.timestamp)}</span>
+              </div>
+              <div class="text-[11px] text-slate-200">
+                <div>จังหวัด: <span class="text-white">${r.province}</span></div>
+                <div>ระดับน้ำ: <span class="font-bold text-rose-400">${r.depthCm} ซม.</span></div>
+                <div class="text-[10px] text-slate-400 mt-1">${r.traffic || 'ไม่มีรายงานการจราจร'}</div>
+              </div>
+            </div>
+          `);
+          markersLayer.addLayer(marker);
+        });
+      }
+
+      // 5. SAFE HAVENS (จุดจอดรถ)
+      if (activeLayers.shelters) {
+        SAFE_HAVENS.forEach(s => {
+          const iconHtml = `<div class="w-8 h-8 rounded-xl bg-blue-950 border-2 border-blue-400 shadow-xl flex items-center justify-center text-blue-200 text-sm">🚗</div>`;
+          const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
+
+          const marker = L.marker([s.lat, s.lng], { icon: customIcon });
+          marker.bindPopup(`
+            <div class="p-2 space-y-1 min-w-[220px] font-sans">
+              <div class="font-bold text-blue-300 text-xs">${s.name}</div>
               <div class="text-[11px] text-slate-300 space-y-0.5">
-                <div class="flex justify-between"><span>ภาษาอังกฤษ:</span><span class="text-white">${st.en}</span></div>
-                <div class="flex justify-between"><span>รัศมีตรวจจับ:</span><span class="font-mono text-cyan-400">${st.radiusKm} กม.</span></div>
-                <div class="flex justify-between"><span>เทคโนโลยี:</span><span class="text-slate-300">${st.type}</span></div>
-                <div class="flex justify-between"><span>สถานะ:</span><span class="text-emerald-400 font-medium">${st.status}</span></div>
+                <div>จังหวัด: <span class="text-white">${s.province}</span></div>
+                <div>ความจุ: <span class="font-bold text-emerald-400 font-mono">${s.capacityCars.toLocaleString()} คัน</span></div>
+                <div class="text-[10px] text-slate-400">${s.status}</div>
               </div>
             </div>
           `);
@@ -1401,24 +1330,7 @@
       }
     }
 
-    // ── QUICK ZONE ZOOM ──
-    function zoomToZone(zone) {
-      if (!map) return;
-      if (zone === 'all') {
-        map.setView([13.7563, 100.5618], 11);
-      } else if (zone === 'central') {
-        map.setView([13.7400, 100.5600], 13);
-      } else if (zone === 'thonburi') {
-        map.setView([13.7250, 100.4600], 12);
-      } else if (zone === 'kmitl') {
-        map.setView([13.7298, 100.7765], 14);
-      } else if (zone === 'suvarnabhumi') {
-        map.setView([13.6900, 100.7500], 12);
-      }
-      switchTab('map');
-    }
-
-    // ── TAB SWITCHING & HASH ROUTING ──
+    // ── TAB SWITCHING ──
     function switchTab(tabId) {
       document.querySelectorAll('.panel-view').forEach(p => p.classList.add('hidden'));
 
@@ -1427,55 +1339,118 @@
         b.classList.add('text-slate-400');
       });
 
-      const activeDockBtn = document.getElementById('dock-' + tabId);
-      if (activeDockBtn) {
-        activeDockBtn.classList.add('active', 'text-cyan-400');
-        activeDockBtn.classList.remove('text-slate-400');
+      const activeDock = document.getElementById('dock-' + tabId);
+      if (activeDock) {
+        activeDock.classList.add('active', 'text-cyan-400');
+        activeDock.classList.remove('text-slate-400');
       }
 
-      if (tabId === 'map') {
-        try { history.replaceState(null, null, ' '); } catch(e){}
-        if (map) setTimeout(() => map.invalidateSize(), 150);
-        return;
-      }
+      const targetView = document.getElementById('view-' + tabId);
+      if (targetView) targetView.classList.remove('hidden');
 
-      try { history.replaceState(null, null, '#' + tabId); } catch(e){}
-      const panel = document.getElementById('view-' + tabId);
-      if (panel) {
-        panel.classList.remove('hidden');
-        if (tabId === 'basins') renderBasinsGrid();
-        if (tabId === 'hotspots') renderHotspotsGrid();
-        if (tabId === 'reports') renderReportsFeed();
-      }
+      if (tabId === 'basins') renderBasinsGrid();
+      if (tabId === 'hotspots') renderHotspotsGrid();
+      if (tabId === 'reports') renderReportsFeed();
+      if (tabId === 'hydro') renderTopDams();
     }
 
-    // ── RENDER BASINS GRID ──
+    function switchHydroTab(subTab) {
+      document.getElementById('hydro-sub-dams')?.classList.toggle('hidden', subTab !== 'dams');
+      document.getElementById('hydro-sub-bkk3water')?.classList.toggle('hidden', subTab !== 'bkk3water');
+      document.getElementById('hydro-sub-globalclimate')?.classList.toggle('hidden', subTab !== 'globalclimate');
+
+      ['dams', 'bkk3water', 'globalclimate'].forEach(key => {
+        const btn = document.getElementById('hydro-tab-' + key);
+        if (btn) {
+          if (key === subTab) {
+            btn.className = 'px-3 py-1.5 rounded-xl bg-cyan-950 text-cyan-300 border border-cyan-600 font-semibold text-xs transition';
+          } else {
+            btn.className = 'px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-slate-200 text-xs transition';
+          }
+        }
+      });
+    }
+
+    // ── RENDER DAMS & BASINS GRID ──
+    function filterBasins(cat) {
+      currentBasinFilter = cat;
+      document.querySelectorAll('.basin-filter-btn').forEach(b => {
+        b.classList.remove('active', 'bg-cyan-950', 'text-cyan-300', 'border-cyan-600');
+        b.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
+      });
+      event.target.classList.add('active', 'bg-cyan-950', 'text-cyan-300', 'border-cyan-600');
+      renderBasinsGrid();
+    }
+
     function renderBasinsGrid() {
-      const grid = document.getElementById('basins-grid');
-      const search = (document.getElementById('basin-search')?.value || '').toLowerCase();
-      if (!grid) return;
+      const container = document.getElementById('basins-grid');
+      if (!container) return;
+      const search = (document.getElementById('basin-search')?.value || '').toLowerCase().trim();
 
-      const filtered = RETENTION_BASINS.filter(b => b.name.toLowerCase().includes(search) || b.district.toLowerCase().includes(search));
+      const filtered = DAMS_AND_BASINS.filter(b => {
+        const matchesCat = currentBasinFilter === 'all' || 
+          (currentBasinFilter === 'dam' && b.type === 'dam') ||
+          (currentBasinFilter === 'basin' && b.type === 'basin') ||
+          (b.region === currentBasinFilter);
 
-      grid.innerHTML = filtered.map(b => {
-        const remainPercent = Math.round(((b.capacityM3 - b.currentM3) / b.capacityM3) * 100);
-        const isWarning = remainPercent < 30;
+        const matchesSearch = !search || 
+          b.name.toLowerCase().includes(search) || 
+          b.en.toLowerCase().includes(search) || 
+          b.province.toLowerCase().includes(search);
 
+        return matchesCat && matchesSearch;
+      });
+
+      container.innerHTML = filtered.map(b => {
+        const isDam = b.type === 'dam';
+        const fillPercent = Math.round((b.currentM3 / b.capacityM3) * 100);
         return `
-          <div class="glass-card rounded-2xl p-4 border border-slate-800 hover:border-cyan-600/50 transition cursor-pointer" onclick="zoomToCoord(${b.lat}, ${b.lng}, 14)">
-            <div class="flex items-center justify-between mb-2">
-              <h4 class="font-bold text-sm text-white">${b.name}</h4>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isWarning ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}">
-                เหลือว่าง ${remainPercent}%
+          <div class="p-4 rounded-2xl glass-panel border border-slate-800 hover:border-cyan-500/50 transition space-y-2 cursor-pointer" onclick="quickJump(${b.lat}, ${b.lng}, 12, '${b.name}')">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-sm flex items-center gap-1.5">
+                <span>${isDam ? '🏔️' : '🏞️'}</span> ${b.name}
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded font-mono ${isDam ? 'bg-blue-950 text-blue-300 border border-blue-800' : 'bg-cyan-950 text-cyan-300 border border-cyan-800'}">
+                ${b.province}
               </span>
             </div>
-            <p class="text-xs text-slate-400 mb-2.5">เขต${b.district} · อัตราพร่องน้ำ ${b.drainRateM3s} m³/s</p>
-            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden mb-2">
-              <div class="bg-gradient-to-r from-emerald-500 to-cyan-400 h-2 rounded-full" style="width:${100-remainPercent}%"></div>
+            <div class="text-xs text-slate-400">${b.en}</div>
+            <div class="space-y-1 pt-1">
+              <div class="flex justify-between text-xs font-mono">
+                <span class="text-slate-400">ปริมาณน้ำ:</span>
+                <span class="text-cyan-300 font-bold">${b.currentM3.toLocaleString()} / ${b.capacityM3.toLocaleString()} ล้าน ลบ.ม.</span>
+              </div>
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div class="h-full ${fillPercent > 80 ? 'bg-amber-400' : 'bg-cyan-400'}" style="width: ${fillPercent}%"></div>
+              </div>
+              <div class="flex justify-between text-[10px] text-slate-400">
+                <span>ความจุกักเก็บ: ${fillPercent}%</span>
+                <span>ระบาย: ${b.outflowRate} ลบ.ม./วิ</span>
+              </div>
             </div>
-            <div class="flex justify-between text-[11px] text-slate-400 font-mono">
-              <span>กักเก็บ: ${(b.currentM3/1000000).toFixed(2)} ล้าน m³</span>
-              <span>จุสูงสุด: ${(b.capacityM3/1000000).toFixed(2)} ล้าน m³</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTopDams() {
+      const container = document.getElementById('top-dams-container');
+      if (!container) return;
+      const topDams = DAMS_AND_BASINS.filter(b => b.type === 'dam').slice(0, 12);
+      container.innerHTML = topDams.map(d => {
+        const fill = Math.round((d.currentM3 / d.capacityM3) * 100);
+        return `
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+            <div class="flex justify-between text-xs font-bold text-white">
+              <span>${d.name} (${d.province})</span>
+              <span class="font-mono ${fill > 80 ? 'text-amber-400' : 'text-cyan-400'}">${fill}%</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div class="h-full ${fill > 80 ? 'bg-amber-400' : 'bg-cyan-400'}" style="width: ${fill}%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+              <span>${d.currentM3.toLocaleString()} MCM</span>
+              <span>ออก: ${d.outflowRate} m³/s</span>
             </div>
           </div>
         `;
@@ -1483,31 +1458,49 @@
     }
 
     // ── RENDER HOTSPOTS GRID ──
+    function filterHotspots(cat) {
+      currentHotspotFilter = cat;
+      document.querySelectorAll('.hotspot-filter-btn').forEach(b => {
+        b.classList.remove('active', 'bg-rose-950', 'text-rose-300', 'border-rose-600');
+        b.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
+      });
+      event.target.classList.add('active', 'bg-rose-950', 'text-rose-300', 'border-rose-600');
+      renderHotspotsGrid();
+    }
+
     function renderHotspotsGrid() {
-      const grid = document.getElementById('hotspots-grid');
-      const filter = document.getElementById('hotspot-filter')?.value || 'all';
-      if (!grid) return;
+      const container = document.getElementById('hotspots-grid');
+      if (!container) return;
 
       const filtered = FLOOD_HOTSPOTS.filter(h => {
-        if (filter === 'critical') return h.status === 'critical';
-        if (filter === 'warning') return h.status === 'warning';
-        if (filter === 'normal') return h.status === 'normal';
+        if (currentHotspotFilter === 'all') return true;
+        if (currentHotspotFilter === 'upcountry') return h.province !== 'กรุงเทพฯ';
+        if (currentHotspotFilter === 'bkk') return h.province === 'กรุงเทพฯ';
+        if (currentHotspotFilter === 'critical') return h.status === 'critical';
+        if (currentHotspotFilter === 'warning') return h.status === 'warning';
         return true;
       });
 
-      grid.innerHTML = filtered.map(h => {
+      container.innerHTML = filtered.map(h => {
         const isCrit = h.status === 'critical';
         return `
-          <div class="glass-card rounded-2xl p-4 border border-slate-800 hover:border-rose-600/50 transition cursor-pointer" onclick="zoomToCoord(${h.lat}, ${h.lng}, 15)">
-            <div class="flex items-center justify-between mb-1.5">
-              <h4 class="font-bold text-sm text-white">${h.name}</h4>
-              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded ${isCrit ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-amber-950 text-amber-300 border border-amber-800'}">
-                ${h.depthCm} cm
+          <div class="p-4 rounded-2xl glass-panel border border-slate-800 hover:border-rose-500/50 transition space-y-2 cursor-pointer" onclick="quickJump(${h.lat}, ${h.lng}, 14, '${h.name}')">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-xs">${h.name}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded font-bold ${isCrit ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-amber-950 text-amber-300 border border-amber-800'}">
+                ${isCrit ? 'วิกฤต' : 'เฝ้าระวัง'}
               </span>
             </div>
-            <p class="text-xs text-slate-400 mb-2">เขต${h.district} · เครื่องสูบน้ำ ${h.pumpCount} เครื่อง</p>
-            <div class="p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] text-slate-300">
-              <span class="font-semibold text-slate-400">สภาพการจราจร:</span> ${h.traffic}
+            <div class="text-[11px] text-slate-300 flex justify-between">
+              <span>จังหวัด: <span class="text-white">${h.province}</span></span>
+              <span>น้ำขัง: <span class="font-bold font-mono text-rose-400">${h.depthCm} ซม.</span></span>
+            </div>
+            <div class="text-[10px] text-amber-200 bg-amber-950/40 p-2 rounded border border-amber-900/60">
+              ${h.traffic}
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 pt-1">
+              <span>สูบน้ำ: ${h.pumpCount} เครื่อง</span>
+              <span class="text-cyan-400">คลิกเพื่อซูมบนแผนที่ →</span>
             </div>
           </div>
         `;
@@ -1516,205 +1509,63 @@
 
     // ── RENDER REPORTS FEED ──
     function renderReportsFeed() {
-      const grid = document.getElementById('reports-feed-grid');
-      if (!grid) return;
+      const container = document.getElementById('reports-feed-container');
+      if (!container) return;
 
-      if (!citizenReports || citizenReports.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-2 text-center py-12 text-slate-500 text-xs">
-            ยังไม่มีรายงานน้ำท่วมจากประชาชนในขณะนี้
-          </div>
-        `;
-        return;
-      }
+      document.getElementById('report-count-badge').textContent = `(${citizenReports.length})`;
 
-      grid.innerHTML = citizenReports.map(r => {
-        const relTime = formatRelativeTime(r.timestamp);
-        const exactTime = formatTimeExact(r.timestamp);
-
-        return `
-          <div class="glass-card rounded-2xl p-4 border border-slate-800 hover:border-cyan-600/50 transition flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="font-bold text-white text-sm">${r.name}</span>
-                <span class="text-[10px] font-mono text-cyan-400 px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-800" title="${exactTime}">
-                  ⏱️ ${relTime}
-                </span>
-              </div>
-              ${r.imageUrl ? `
-                <div class="rounded-xl overflow-hidden border border-slate-700 mb-3 cursor-pointer group relative" onclick="openPhotoModal('${r.imageUrl}', '${r.name}', '${relTime}')">
-                  <img src="${r.imageUrl}" alt="${r.name}" class="w-full h-44 object-cover group-hover:scale-105 transition duration-300">
-                  <span class="absolute bottom-2 right-2 px-2 py-1 rounded bg-black/75 text-[10px] text-white backdrop-blur">
-                    🔍 คลิกดูภาพขยาย
-                  </span>
-                </div>
-              ` : ''}
-              <div class="flex items-center gap-2 mb-2">
-                <span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-amber-950 text-amber-300 border border-amber-800">
-                  💧 ระดับน้ำ ${r.depthCm} cm
-                </span>
-                <span class="text-xs text-slate-400">(${r.levelText || 'น้ำรอระบาย'})</span>
-              </div>
-              <p class="text-xs text-slate-300 mb-2 leading-relaxed">${r.note || 'ไม่มีหมายเหตุเพิ่มเติม'}</p>
+      container.innerHTML = citizenReports.map(r => `
+        <div class="p-4 rounded-2xl glass-panel border border-slate-800 flex items-start justify-between gap-3">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white text-xs sm:text-sm">${r.name}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">${r.province}</span>
             </div>
-            <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-              <span>👤 ผู้แจ้ง: <span class="text-slate-200">${r.reporter || 'พลเมืองดี'}</span></span>
-              <button onclick="zoomToCoord(${r.lat}, ${r.lng}, 15)" class="text-cyan-400 hover:underline flex items-center gap-1">
-                📍 ดูบนแผนที่
-              </button>
+            <div class="text-xs text-slate-300">
+              ระดับน้ำ: <span class="font-bold font-mono text-rose-400">${r.depthCm} ซม.</span> • สภาพ: ${r.traffic || 'ปกติ'}
+            </div>
+            <div class="text-[10px] text-slate-500 font-mono">
+              รายงานเมื่อ: ${formatRelativeTime(r.timestamp)}
             </div>
           </div>
-        `;
-      }).join('');
-    }
-
-    function zoomToCoord(lat, lng, zoom = 14) {
-      if (!map) return;
-      switchTab('map');
-      map.setView([lat, lng], zoom);
-    }
-
-    // ── FETCH TELEMETRY & REPORTS ──
-    async function fetchTelemetry() {
-      try {
-        const res = await fetch('/api/telemetry');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.upstreamFlowM3s) {
-            document.getElementById('flow-val').textContent = Number(data.upstreamFlowM3s).toLocaleString();
-            document.getElementById('hydro-flow').textContent = Number(data.upstreamFlowM3s).toLocaleString();
-          }
-          if (data.source) {
-            document.getElementById('hydro-source').textContent = data.source;
-          }
-        }
-      } catch (e) {
-        console.warn('Telemetry fetch error:', e);
-      }
-    }
-
-    async function loadReports() {
-      try {
-        const res = await fetch('/api/reports');
-        if (res.ok) {
-          citizenReports = await res.json();
-          document.getElementById('report-count-badge').textContent = `(${citizenReports.length})`;
-          renderAllMarkers();
-          if (!document.getElementById('view-reports').classList.contains('hidden')) {
-            renderReportsFeed();
-          }
-        }
-      } catch (e) {
-        console.warn('Failed to load reports:', e);
-      }
+          <button onclick="quickJump(${r.lat}, ${r.lng}, 15, '${r.name}')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-cyan-950 hover:text-cyan-300 text-xs border border-slate-700 transition">
+            ดูพิกัด 📍
+          </button>
+        </div>
+      `).join('');
     }
 
     // ── MODAL CONTROLS ──
-    function openReportModal() {
-      document.getElementById('modal-report').classList.remove('hidden');
-    }
-    function closeReportModal() {
-      document.getElementById('modal-report').classList.add('hidden');
+    function openReportModal() { document.getElementById('modal-report')?.classList.remove('hidden'); }
+    function closeReportModal() { document.getElementById('modal-report')?.classList.add('hidden'); }
+    function openSosModal() { document.getElementById('modal-sos')?.classList.remove('hidden'); }
+    function closeSosModal() { document.getElementById('modal-sos')?.classList.add('hidden'); }
+
+    function getCurrentLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          document.getElementById('rep-lat').value = pos.coords.latitude.toFixed(4);
+          document.getElementById('rep-lng').value = pos.coords.longitude.toFixed(4);
+        }, () => alert('ไม่สามารถดึงตำแหน่งปัจจุบันได้ กรุณาระบุพิกัดด้วยตนเอง'));
+      }
     }
 
-    function openSosModal() {
-      document.getElementById('modal-sos').classList.remove('hidden');
-    }
-    function closeSosModal() {
-      document.getElementById('modal-sos').classList.add('hidden');
-    }
-
-    function openPhotoModal(url, caption, meta) {
-      const modal = document.getElementById('modal-photo');
-      document.getElementById('modal-photo-img').src = url;
-      document.getElementById('modal-photo-caption').textContent = caption || '';
-      document.getElementById('modal-photo-meta').textContent = meta || '';
-      modal.classList.remove('hidden');
-    }
-    function closePhotoModal() {
-      document.getElementById('modal-photo').classList.add('hidden');
-    }
-
-    // ── REPORT FORM SUBMISSION ──
-    async function handleReportSubmit(e) {
+    function handleReportSubmit(e) {
       e.preventDefault();
-      const btn = document.getElementById('btn-submit-rep');
-      btn.disabled = true;
-      btn.textContent = 'กำลังบันทึก...';
-
-      const name = document.getElementById('rep-name').value;
-      const depthCm = Number(document.getElementById('rep-depth').value);
-      const levelText = document.getElementById('rep-level').value;
-      const district = document.getElementById('rep-district').value;
-      const note = document.getElementById('rep-note').value;
-      const reporter = document.getElementById('rep-reporter').value || 'ประชาชนทั่วไป';
-
-      const districtCoords = {
-        'ลาดกระบัง': { lat: 13.7298, lng: 100.7765 },
-        'จตุจักร': { lat: 13.8165, lng: 100.5612 },
-        'วัฒนา': { lat: 13.7195, lng: 100.5925 },
-        'บางกะปิ': { lat: 13.7645, lng: 100.6485 },
-        'ประเวศ': { lat: 13.6895, lng: 100.6625 },
-        'ห้วยขวาง': { lat: 13.7780, lng: 100.5820 },
-        'ดอนเมือง': { lat: 13.9210, lng: 100.5900 },
-        'บางนา': { lat: 13.6680, lng: 100.6470 },
-        'อื่นๆ': { lat: 13.7563, lng: 100.5618 }
+      const newRep = {
+        id: 'cr' + Date.now(),
+        name: document.getElementById('rep-name').value,
+        province: document.getElementById('rep-province').value,
+        depthCm: parseInt(document.getElementById('rep-depth').value, 10),
+        lat: parseFloat(document.getElementById('rep-lat').value),
+        lng: parseFloat(document.getElementById('rep-lng').value),
+        traffic: document.getElementById('rep-traffic').value,
+        timestamp: Date.now()
       };
-
-      const coords = districtCoords[district] || districtCoords['ลาดกระบัง'];
-
-      const fileInput = document.getElementById('rep-file');
-      let imageUrl = '/assets/reports/cr-03-kmitl.svg';
-
-      if (fileInput.files && fileInput.files[0]) {
-        try {
-          const reader = new FileReader();
-          imageUrl = await new Promise(resolve => {
-            reader.onload = ev => resolve(ev.target.result);
-            reader.readAsDataURL(fileInput.files[0]);
-          });
-        } catch(ex) {
-          imageUrl = '/assets/reports/cr-03-kmitl.svg';
-        }
-      }
-
-      const newReport = {
-        id: `CR-${Date.now()}`,
-        name: name,
-        depthCm: depthCm,
-        levelText: levelText,
-        timestamp: Date.now(),
-        reporter: reporter,
-        lat: coords.lat,
-        lng: coords.lng,
-        imageUrl: imageUrl,
-        note: note
-      };
-
-      try {
-        const res = await fetch('/api/reports', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newReport)
-        });
-        if (res.ok) {
-          await loadReports();
-          closeReportModal();
-          document.getElementById('form-report').reset();
-          document.getElementById('file-preview-wrap').classList.add('hidden');
-          zoomToCoord(newReport.lat, newReport.lng, 15);
-        } else {
-          alert('เกิดข้อผิดพลาดในการบันทึกรายงาน');
-        }
-      } catch (err) {
-        citizenReports.unshift(newReport);
-        renderAllMarkers();
-        closeReportModal();
-        zoomToCoord(newReport.lat, newReport.lng, 15);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<span>🚀</span> บันทึกและเผยแพร่';
-      }
+      citizenReports.unshift(newRep);
+      renderAllMarkers();
+      closeReportModal();
+      quickJump(newRep.lat, newRep.lng, 15, newRep.name);
     }
 
     // ── WEB AUDIO SIREN SOUND ──
@@ -1726,26 +1577,22 @@
 
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440, audioCtx.currentTime);
         osc.frequency.linearRampToValueAtTime(880, audioCtx.currentTime + 0.4);
         osc.frequency.linearRampToValueAtTime(440, audioCtx.currentTime + 0.8);
-
         gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
         gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8);
-
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-
         osc.start();
         osc.stop(audioCtx.currentTime + 0.8);
       } catch (e) {
-        console.warn('Audio siren error:', e);
+        console.warn('Audio siren notice:', e);
       }
     }
 
-    // ── CLOCK & TIMERS ──
+    // ── SYNC & TIMERS ──
     function updateClock() {
       const now = new Date();
       const el = document.getElementById('clock-display');
@@ -1754,70 +1601,36 @@
       }
     }
 
-    // ── FILE PREVIEW LISTENER ──
-    document.getElementById('rep-file')?.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      const preview = document.getElementById('file-preview');
-      const wrap = document.getElementById('file-preview-wrap');
-      if (file && preview && wrap) {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          preview.src = ev.target.result;
-          wrap.classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    // ── ATTACH EVENT LISTENERS ──
-    document.getElementById('btn-report')?.addEventListener('click', openReportModal);
-    document.getElementById('btn-m-report')?.addEventListener('click', openReportModal);
-    document.getElementById('btn-sos')?.addEventListener('click', openSosModal);
-    document.getElementById('btn-m-sos')?.addEventListener('click', openSosModal);
-    document.getElementById('btn-sound')?.addEventListener('click', playSirenSound);
-    document.getElementById('btn-sync')?.addEventListener('click', () => {
-      fetchTelemetry();
-      loadReports();
+    function syncAllData() {
       fetchRadarData();
-    });
+      renderAllMarkers();
+      const btn = event?.target;
+      if (btn) {
+        btn.classList.add('rotate-180');
+        setTimeout(() => btn.classList.remove('rotate-180'), 600);
+      }
+    }
 
     // Layer Toggles
-    function setupLayerToggle(id, layerKey) {
+    function setupToggle(id, key) {
       document.getElementById(id)?.addEventListener('click', function() {
-        activeLayers[layerKey] = !activeLayers[layerKey];
-        this.classList.toggle('opacity-40', !activeLayers[layerKey]);
+        activeLayers[key] = !activeLayers[key];
+        this.classList.toggle('opacity-40', !activeLayers[key]);
         renderAllMarkers();
       });
     }
-    setupLayerToggle('toggle-basins', 'basins');
-    setupLayerToggle('toggle-hotspots', 'hotspots');
-    setupLayerToggle('toggle-reports', 'reports');
-    setupLayerToggle('toggle-shelters', 'shelters');
-
-    // Filter listeners
-    document.getElementById('basin-search')?.addEventListener('input', renderBasinsGrid);
-    document.getElementById('hotspot-filter')?.addEventListener('change', renderHotspotsGrid);
+    setupToggle('toggle-basins', 'basins');
+    setupToggle('toggle-hotspots', 'hotspots');
+    setupToggle('toggle-stations', 'stations');
+    setupToggle('toggle-reports', 'reports');
+    setupToggle('toggle-shelters', 'shelters');
 
     // ── INITIAL BOOTSTRAP ──
     window.addEventListener('DOMContentLoaded', () => {
       initMap();
-      fetchTelemetry();
-      loadReports();
       updateClock();
       setInterval(updateClock, 1000);
-      setInterval(() => {
-        renderAllMarkers();
-        if (!document.getElementById('view-reports').classList.contains('hidden')) {
-          renderReportsFeed();
-        }
-      }, 30000);
       setInterval(fetchRadarData, 120000);
-
-      // Check deep link hash
-      const initialHash = (window.location.hash || '').replace('#', '');
-      if (['radar', 'hydro', 'basins', 'hotspots', 'reports'].includes(initialHash)) {
-        setTimeout(() => switchTab(initialHash), 100);
-      }
     });
   </script>
 </body>
