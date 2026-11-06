@@ -57,7 +57,7 @@
 
     #map { width: 100%; height: 100%; background: #090e17; z-index: 1; }
     .dark-tiles {
-      filter: brightness(0.6) invert(1) contrast(2.2) hue-rotate(200deg) saturate(0.35);
+      /* Native Dark Tiles */
     }
     .leaflet-control-zoom { border: 1px solid #1e293b !important; border-radius: 8px !important; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important; }
     .leaflet-control-zoom a { background: #0e1626 !important; color: #38bdf8 !important; border-bottom: 1px solid #1e293b !important; }
@@ -955,10 +955,11 @@
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      // Free Global Cyber Dark Basemap
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        className: 'dark-tiles',
-        maxZoom: 19
+      // High-Performance Native Dark Basemap (CartoDB Dark Matter)
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 20,
+        zIndex: 1
       }).addTo(map);
 
       markersLayer = L.layerGroup().addTo(map);
